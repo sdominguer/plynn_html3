@@ -1108,12 +1108,29 @@ function printResults() {
   win.document.close();
 }
 
+// ============================================================
+// INITIALIZATION (with Wix email integration)
+// ============================================================
+function initFromUrl() {
+  var emailFromWix = getUrlParam('empresa');
+  if (emailFromWix) {
+    var decoded = decodeURIComponent(emailFromWix);
+    document.getElementById('sessionEmpresa').value = decoded;
+    state.empresa = decoded;
+    // Lock the field so user can't change it
+    document.getElementById('sessionEmpresa').readOnly = true;
+    document.getElementById('sessionEmpresa').style.opacity = '0.6';
+    document.getElementById('sessionEmpresa').title = 'Este campo se asigna automáticamente desde tu cuenta';
+  }
+}
+
 function init() {
   renderEvaluators();
-  addProject('','','P1');
-  addProject('','','P2');
+  addIdea();
+  initFromUrl();
   loadSessionList();
 }
+
 init();
 </script>
 </body>
