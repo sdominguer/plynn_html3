@@ -20,6 +20,8 @@
   --cyan-dark: #0a90b0;
   --red: #FF4343;
   --red-light: #fff0f0;
+  --green: #22c55e;
+  --green-light: #e0f7e0;
   --off-white: #fdf9ee;
   --border: #e8d98a;
   --border-soft: #ede8d5;
@@ -91,6 +93,8 @@ textarea { resize: vertical; min-height: 60px; }
 .btn-secondary:hover { background: var(--navy-pale); }
 .btn-yellow { background: var(--yellow); color: var(--navy-dark); font-weight: 700; box-shadow: 0 4px 16px rgba(255,187,0,0.4); }
 .btn-yellow:hover { background: var(--yellow-mid); transform: translateY(-1px); }
+.btn-green { background: var(--green); color: white; box-shadow: 0 4px 16px rgba(34,197,94,0.3); }
+.btn-green:hover { background: #16a34a; transform: translateY(-1px); }
 .btn-sm { padding: 8px 18px; font-size: 0.78rem; }
 .action-bar { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
 
@@ -185,6 +189,49 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
 
 .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
 .mt-24 { margin-top: 24px; }
+
+/* ===== DB PANEL ===== */
+.db-panel { background: white; border: 1.5px solid var(--border-soft); border-radius: 16px; padding: 20px 24px; box-shadow: 0 2px 12px var(--shadow); margin-bottom: 24px; }
+.db-panel h2 { font-size: 0.82rem; font-weight: 700; color: var(--navy); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid var(--yellow-light); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 8px; }
+.db-panel h2 .icon { width: 26px; height: 26px; background: var(--yellow-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.db-status { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 10px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; }
+.db-status.connected { background: var(--green-light); color: #1a6020; border: 1px solid #b6e8b6; }
+.db-status.disconnected { background: var(--red-light); color: var(--red); border: 1px solid #ffc0c0; }
+.db-status.loading { background: var(--yellow-light); color: #8a6000; border: 1px solid #ffe080; }
+.db-status .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.db-status.connected .dot { background: var(--green); }
+.db-status.disconnected .dot { background: var(--red); }
+.db-status.loading .dot { background: var(--yellow); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.session-list { max-height: 220px; overflow-y: auto; }
+.session-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border-soft); border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
+.session-item:hover { border-color: var(--yellow-mid); background: var(--yellow-pale); }
+.session-item .si-info { flex: 1; }
+.session-item .si-empresa { font-weight: 700; font-size: 0.85rem; color: var(--navy); }
+.session-item .si-meta { font-size: 0.72rem; color: var(--text-mid); margin-top: 2px; }
+.session-item .si-badge { font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
+.si-badge.complete { background: var(--green-light); color: #1a6020; }
+.si-badge.incomplete { background: var(--yellow-light); color: #8a6000; }
+.session-item .si-delete { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1rem; padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+.session-item .si-delete:hover { background: var(--red-light); }
+
+.toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 24px; border-radius: 12px; font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 600; color: white; z-index: 10000; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; box-shadow: 0 8px 32px rgba(0,0,0,0.2); max-width: 380px; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+.toast.info { background: var(--navy); }
+
+.autosave-indicator { position: fixed; bottom: 24px; left: 24px; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; background: white; border: 1px solid var(--border-soft); box-shadow: 0 4px 16px var(--shadow); z-index: 100; opacity: 0; transition: opacity 0.3s; }
+.autosave-indicator.visible { opacity: 1; }
+.autosave-indicator .spinner { width: 14px; height: 14px; border: 2px solid var(--border-soft); border-top-color: var(--yellow); border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media print {
+  .header, .progress-track, .eval-tabs, .proj-nav, .action-bar, .btn, .db-panel, .toast, .autosave-indicator { display: none !important; }
+  .screen { display: block !important; }
+  #screen-setup, #screen-evaluate { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -209,6 +256,9 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
 </div>
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
+<div class="toast" id="toast"></div>
+<div class="autosave-indicator" id="autosaveIndicator"><div class="spinner"></div><span>Guardando...</span></div>
+
 <div class="container">
 
   <!-- SETUP SCREEN -->
@@ -217,6 +267,22 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
       <div class="eyebrow">Comité de Innovación · Priorización de Proyectos I+D+i</div>
       <h1>¿Qué proyectos de<br>I+D+i debemos <span class="accent">priorizar?</span></h1>
       <p>Configure los proyectos a evaluar y los miembros del comité. Cada evaluador calificará 16 criterios por proyecto para obtener una priorización objetiva y consensuada.</p>
+    </div>
+
+    <!-- DB PANEL -->
+    <div class="db-panel" id="dbPanel">
+      <h2><span class="icon">💾</span> Sesiones Guardadas <small style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem;color:var(--text-mid);margin-left:8px;">(Google Sheets)</small></h2>
+      <div class="db-status disconnected" id="dbStatus">
+        <div class="dot"></div>
+        <span id="dbStatusText">Verificando conexión...</span>
+      </div>
+      <div id="sessionListArea">
+        <div style="text-align:center;padding:16px;color:var(--text-mid);font-size:0.82rem;">Cargando sesiones...</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn btn-sm btn-yellow" onclick="loadSessionList()" style="flex:1;">🔄 Actualizar</button>
+        <button class="btn btn-sm btn-secondary" onclick="newSession()" style="flex:1;">＋ Nueva sesión</button>
+      </div>
     </div>
 
     <div class="form-grid" style="margin-bottom:20px;">
@@ -259,7 +325,10 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
         <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.16em;color:var(--yellow-dark);margin-bottom:4px;font-weight:700;">Fase de Evaluación</div>
         <div style="font-size:1.3rem;font-weight:900;color:var(--navy-dark);">Califique cada proyecto</div>
       </div>
-      <button class="btn btn-secondary btn-sm" onclick="goBack()">← Volver</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-green btn-sm" onclick="manualSave()">💾 Guardar</button>
+        <button class="btn btn-secondary btn-sm" onclick="goBack()">← Volver</button>
+      </div>
     </div>
     <div class="eval-tabs" id="evalTabs"></div>
     <div class="proj-nav" id="projNav"></div>
@@ -297,6 +366,7 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
     </div>
     <div class="action-bar">
       <button class="btn btn-secondary" onclick="goBackToEval()">← Volver a evaluar</button>
+      <button class="btn btn-green" onclick="manualSave()">💾 Guardar en Sheets</button>
       <button class="btn btn-primary" onclick="printResults()">🖨 Imprimir</button>
       <button class="btn btn-yellow" onclick="exportCSV()">⬇ Exportar CSV</button>
     </div>
@@ -305,7 +375,13 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
 </div>
 
 <script>
-const CRITERIA = [
+// ============================================================
+// CONFIGURACIÓN — CAMBIA ESTA URL POR TU URL DE APPS SCRIPT
+// ============================================================
+var APPS_SCRIPT_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+// ============================================================
+
+var CRITERIA = [
   {id:'c01', cat:'Tecnología', name:'Madurez de la tecnología', scale:'1 = Madura · 5 = Emergente'},
   {id:'c02', cat:'Tecnología', name:'Tipo de innovación', scale:'1 = Incremental · 5 = Radical'},
   {id:'c03', cat:'Tecnología', name:'Dominio de la tecnología por la empresa', scale:'1 = No tiene el conocimiento · 5 = Domina el conocimiento'},
@@ -321,79 +397,327 @@ const CRITERIA = [
   {id:'c13', cat:'Recursos', name:'Necesita aliados para su desarrollo', scale:'1 = Muchos aliados necesarios · 5 = Ninguno'},
   {id:'c14', cat:'Impacto', name:'Impacto Ambiental', scale:'1 = Muy negativo · 5 = Muy positivo'},
   {id:'c15', cat:'Impacto', name:'Impacto social', scale:'1 = Muy negativo · 5 = Muy positivo'},
-  {id:'c16', cat:'Riesgo', name:'Riesgo técnico y comercial (global)', scale:'1 = Muy alta probabilidad de fracaso · 5 = Muy baja probabilidad de fracaso'},
+  {id:'c16', cat:'Riesgo', name:'Riesgo técnico y comercial (global)', scale:'1 = Muy alta probabilidad de fracaso · 5 = Muy baja probabilidad de fracaso'}
 ];
 
-const CATEGORIES = ['Tecnología', 'Mercado', 'Recursos', 'Impacto', 'Riesgo'];
-const CAT_ICONS = { Tecnología: '⚙️', Mercado: '📈', Recursos: '💰', Impacto: '🌱', Riesgo: '⚠️' };
+var CATEGORIES = ['Tecnología', 'Mercado', 'Recursos', 'Impacto', 'Riesgo'];
+var CAT_ICONS = { Tecnología: '⚙️', Mercado: '📈', Recursos: '💰', Impacto: '🌱', Riesgo: '⚠️' };
 
-let state = { evaluators: [], projects: [], scores: {}, currentEval: 0, currentProject: 0, empresa: '', fecha: '' };
-let projIdCounter = 0;
+var state = { evaluators: [], projects: [], scores: {}, currentEval: 0, currentProject: 0, empresa: '', fecha: '', sessionId: null };
+var projIdCounter = 0;
+var dbConnected = false;
+var saveTimeout = null;
+
+// ============================================================
+// DB FUNCTIONS
+// ============================================================
+
+function showToast(message, type) {
+  type = type || 'info';
+  var el = document.getElementById('toast');
+  el.textContent = message;
+  el.className = 'toast ' + type + ' show';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+
+function showAutosave(visible) {
+  var el = document.getElementById('autosaveIndicator');
+  if (visible) el.classList.add('visible'); else el.classList.remove('visible');
+}
+
+function updateDbStatus(status, text) {
+  var el = document.getElementById('dbStatus');
+  el.className = 'db-status ' + status;
+  document.getElementById('dbStatusText').textContent = text;
+}
+
+function isConfigured() {
+  return APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+}
+
+function loadSessionList() {
+  if (!isConfigured()) {
+    updateDbStatus('disconnected', 'URL de Apps Script no configurada');
+    document.getElementById('sessionListArea').innerHTML =
+      '<div style="text-align:center;padding:16px;color:var(--red);font-size:0.78rem;">⚠️ Configura la variable <code>APPS_SCRIPT_URL</code> en el código HTML.</div>';
+    return;
+  }
+  updateDbStatus('loading', 'Conectando con Google Sheets...');
+  fetch(APPS_SCRIPT_URL + '?action=list')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      dbConnected = true;
+      if (data.error) { updateDbStatus('disconnected', 'Error: ' + data.error); return; }
+      updateDbStatus('connected', 'Conectado a Google Sheets');
+      renderSessionList(data.sessions || []);
+    })
+    .catch(function(err) {
+      dbConnected = false;
+      updateDbStatus('disconnected', 'Sin conexión — modo offline');
+      document.getElementById('sessionListArea').innerHTML =
+        '<div style="text-align:center;padding:16px;color:var(--text-mid);font-size:0.78rem;">No se pudo conectar. Puedes trabajar offline.</div>';
+    });
+}
+
+function renderSessionList(sessions) {
+  var area = document.getElementById('sessionListArea');
+  if (!sessions.length) {
+    area.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-mid);font-size:0.82rem;">No hay sesiones guardadas.</div>';
+    return;
+  }
+  var html = '<div class="session-list">';
+  sessions.forEach(function(s) {
+    var isComplete = s.completado === 'Sí';
+    html += '<div class="session-item" onclick="loadSavedSession(\'' + s.sessionId + '\')">'
+      + '<div class="si-info">'
+      + '<div class="si-empresa">' + (s.empresa || 'Sin nombre') + '</div>'
+      + '<div class="si-meta">📅 ' + (s.fecha || 'Sin fecha') + ' · 📋 ' + s.numProyectos + ' proyectos · 👥 ' + (s.evaluadores || '').split('||').length + ' eval.</div>'
+      + '</div>'
+      + '<span class="si-badge ' + (isComplete ? 'complete' : 'incomplete') + '">' + (isComplete ? '✓ Completo' : '⏳ En curso') + '</span>'
+      + '<button class="si-delete" onclick="event.stopPropagation();deleteSavedSession(\'' + s.sessionId + '\',\'' + (s.empresa||'').replace(/'/g,"\\'") + '\')" title="Eliminar">🗑</button>'
+      + '</div>';
+  });
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+function loadSavedSession(sessionId) {
+  if (!isConfigured()) return;
+  updateDbStatus('loading', 'Cargando sesión...');
+  showToast('Cargando sesión...', 'info');
+
+  fetch(APPS_SCRIPT_URL + '?action=load&sessionId=' + encodeURIComponent(sessionId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) { showToast('Error: ' + data.error, 'error'); updateDbStatus('connected', 'Conectado'); return; }
+
+      state.sessionId = data.session.sessionId;
+      state.empresa = data.session.empresa || '';
+      state.fecha = data.session.fecha || '';
+
+      var evaluadores = data.session.evaluadores || [];
+      state.evaluators = evaluadores.map(function(name) { return { name: name }; });
+
+      state.projects = (data.proyectos || []).map(function(p) {
+        return { title: p.titulo, desc: p.descripcion || '', shortName: p.nombreCorto };
+      });
+
+      state.scores = {};
+      state.evaluators.forEach(function(_, ei) {
+        state.scores[ei] = {};
+        state.projects.forEach(function(_, pi) { state.scores[ei][pi] = {}; });
+      });
+
+      (data.evaluaciones || []).forEach(function(ev) {
+        var ei = ev.evaluadorIndex, pi = ev.proyectoIndex;
+        if (state.scores[ei] && state.scores[ei][pi] !== undefined) {
+          CRITERIA.forEach(function(cr) {
+            var val = ev[cr.id];
+            if (val) state.scores[ei][pi][cr.id] = val;
+          });
+        }
+      });
+
+      document.getElementById('sessionEmpresa').value = state.empresa;
+      document.getElementById('sessionFecha').value = state.fecha;
+      document.getElementById('numEvaluators').value = state.evaluators.length;
+      renderEvaluators();
+      state.evaluators.forEach(function(ev, i) {
+        var el = document.getElementById('evalName' + i);
+        if (el) el.value = ev.name;
+      });
+
+      document.getElementById('projects-list').innerHTML = '';
+      projIdCounter = 0;
+      state.projects.forEach(function(p) { addProject(p.title, p.desc, p.shortName); });
+
+      updateDbStatus('connected', 'Conectado — sesión cargada');
+      showToast('✓ Sesión cargada: ' + state.empresa, 'success');
+
+      if (data.evaluaciones && data.evaluaciones.length > 0) {
+        state.currentEval = 0; state.currentProject = 0;
+        showScreen('screen-evaluate'); renderEvalScreen();
+      }
+    })
+    .catch(function(err) {
+      showToast('Error al cargar: ' + err.message, 'error');
+      updateDbStatus('connected', 'Conectado');
+    });
+}
+
+function deleteSavedSession(sessionId, empresa) {
+  if (!confirm('¿Eliminar la sesión "' + empresa + '"?')) return;
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ action: 'delete', sessionId: sessionId })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) { showToast('Sesión eliminada', 'success'); loadSessionList(); }
+    else showToast('Error: ' + (data.error || ''), 'error');
+  })
+  .catch(function(err) { showToast('Error: ' + err.message, 'error'); });
+}
+
+function newSession() {
+  state.sessionId = null; state.empresa = ''; state.fecha = '';
+  state.evaluators = []; state.projects = []; state.scores = {};
+  document.getElementById('sessionEmpresa').value = '';
+  document.getElementById('sessionFecha').value = '';
+  document.getElementById('numEvaluators').value = 3;
+  document.getElementById('projects-list').innerHTML = '';
+  projIdCounter = 0;
+  renderEvaluators();
+  addProject('','','P1'); addProject('','','P2');
+  showToast('Nueva sesión — configura los datos', 'info');
+}
+
+function saveToSheets(showNotification) {
+  if (!isConfigured() || !dbConnected) return;
+  showAutosave(true);
+
+  var evaluaciones = [];
+  state.evaluators.forEach(function(ev, ei) {
+    state.projects.forEach(function(proj, pi) {
+      var sc = state.scores[ei] && state.scores[ei][pi] ? state.scores[ei][pi] : {};
+      var vals = CRITERIA.map(function(cr) { return sc[cr.id] || 0; }).filter(function(v) { return v > 0; });
+      var nota = vals.length ? vals.reduce(function(a,b){return a+b;},0) / vals.length : 0;
+
+      var entry = {
+        evaluadorIndex: ei, evaluadorNombre: ev.name,
+        proyectoIndex: pi, proyectoNombre: proj.shortName,
+        notaFinal: parseFloat(nota.toFixed(2))
+      };
+      CRITERIA.forEach(function(cr) { entry[cr.id] = sc[cr.id] || 0; });
+      evaluaciones.push(entry);
+    });
+  });
+
+  var allDone = state.evaluators.every(function(_, ei) {
+    return state.projects.every(function(_, pi) {
+      return CRITERIA.every(function(cr) { return state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]; });
+    });
+  });
+
+  var payload = {
+    action: 'save', sessionId: state.sessionId,
+    empresa: state.empresa, fecha: state.fecha,
+    evaluadores: state.evaluators.map(function(e) { return e.name; }),
+    numProyectos: state.projects.length, completado: allDone,
+    proyectos: state.projects.map(function(p) { return { titulo: p.title, descripcion: p.desc, nombreCorto: p.shortName }; }),
+    evaluaciones: evaluaciones
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    showAutosave(false);
+    if (data.success) {
+      if (!state.sessionId) state.sessionId = data.sessionId;
+      if (showNotification) showToast('✓ Guardado en Google Sheets', 'success');
+    } else {
+      if (showNotification) showToast('Error al guardar: ' + (data.error || ''), 'error');
+    }
+  })
+  .catch(function(err) {
+    showAutosave(false);
+    if (showNotification) showToast('Error de conexión al guardar', 'error');
+  });
+}
+
+function manualSave() {
+  if (!isConfigured()) { showToast('Configura la URL de Apps Script primero', 'error'); return; }
+  saveToSheets(true);
+}
+
+function scheduleAutoSave() {
+  if (!isConfigured() || !dbConnected) return;
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(function() { saveToSheets(false); }, 5000);
+}
+
+// ============================================================
+// ORIGINAL FUNCTIONS (with auto-save hooks)
+// ============================================================
 
 function renderEvaluators() {
-  const n = Math.max(1, Math.min(6, parseInt(document.getElementById('numEvaluators').value) || 1));
+  var n = Math.max(1, Math.min(6, parseInt(document.getElementById('numEvaluators').value) || 1));
   document.getElementById('numEvaluators').value = n;
-  const c = document.getElementById('evaluators-list');
+  var c = document.getElementById('evaluators-list');
   c.innerHTML = '';
-  for (let i = 0; i < n; i++) {
-    const prev = state.evaluators[i] || {};
-    c.innerHTML += `<div class="mb-16"><label>Nombre del evaluador ${i+1}</label><input type="text" id="evalName${i}" value="${prev.name || ''}" placeholder="Ej: María García"></div>`;
+  for (var i = 0; i < n; i++) {
+    var prev = state.evaluators[i] || {};
+    c.innerHTML += '<div class="mb-16"><label>Nombre del evaluador ' + (i+1) + '</label><input type="text" id="evalName' + i + '" value="' + (prev.name || '') + '" placeholder="Ej: María García"></div>';
   }
 }
 
-function addProject(title = '', desc = '', shortVal = '') {
-  const existing = document.querySelectorAll('.project-entry').length;
+function addProject(title, desc, shortVal) {
+  title = title || ''; desc = desc || ''; shortVal = shortVal || '';
+  var existing = document.querySelectorAll('.project-entry').length;
   if (existing >= 10) { alert('Máximo 10 proyectos.'); return; }
-  const id = ++projIdCounter, idx = existing + 1;
-  const container = document.getElementById('projects-list');
-  const div = document.createElement('div');
+  var id = ++projIdCounter, idx = existing + 1;
+  var container = document.getElementById('projects-list');
+  var div = document.createElement('div');
   div.className = 'project-entry';
-  div.id = `project-entry-${id}`;
-  div.innerHTML = `
-    <div class="proj-num">${idx}</div>
-    <div class="proj-fields">
-      <div><label>Nombre del proyecto</label>
-        <input type="text" id="proj-title-${id}" placeholder="Ej: Sistema de monitoreo inteligente" value="${title}">
-      </div>
-      <div><label>Descripción breve <small style="font-weight:400;text-transform:none;">(opcional)</small></label>
-        <textarea id="proj-desc-${id}" rows="2" placeholder="Describe brevemente el proyecto...">${desc}</textarea>
-      </div>
-      <div><label>Nombre corto</label>
-        <input type="text" id="proj-short-${id}" placeholder="Ej: P1" value="${shortVal || 'P' + idx}">
-      </div>
-    </div>
-    <button class="del-btn" onclick="removeProject(${id})">✕</button>`;
+  div.id = 'project-entry-' + id;
+  div.innerHTML = '<div class="proj-num">' + idx + '</div>'
+    + '<div class="proj-fields">'
+    + '<div><label>Nombre del proyecto</label>'
+    + '<input type="text" id="proj-title-' + id + '" placeholder="Ej: Sistema de monitoreo inteligente" value="' + title + '"></div>'
+    + '<div><label>Descripción breve <small style="font-weight:400;text-transform:none;">(opcional)</small></label>'
+    + '<textarea id="proj-desc-' + id + '" rows="2" placeholder="Describe brevemente el proyecto...">' + desc + '</textarea></div>'
+    + '<div><label>Nombre corto</label>'
+    + '<input type="text" id="proj-short-' + id + '" placeholder="Ej: P1" value="' + (shortVal || 'P' + idx) + '"></div>'
+    + '</div>'
+    + '<button class="del-btn" onclick="removeProject(' + id + ')">✕</button>';
   container.appendChild(div);
   renumberProjects();
 }
 
-function removeProject(id) { document.getElementById(`project-entry-${id}`).remove(); renumberProjects(); }
-function renumberProjects() { document.querySelectorAll('.project-entry').forEach((el, i) => { el.querySelector('.proj-num').textContent = i + 1; }); }
+function removeProject(id) { document.getElementById('project-entry-' + id).remove(); renumberProjects(); }
+function renumberProjects() { document.querySelectorAll('.project-entry').forEach(function(el, i) { el.querySelector('.proj-num').textContent = i + 1; }); }
 
 function collectSetup() {
-  state.empresa = (document.getElementById('sessionEmpresa')?.value || '').trim() || 'Sin especificar';
-  state.fecha = document.getElementById('sessionFecha')?.value || '';
-  const n = parseInt(document.getElementById('numEvaluators').value);
+  state.empresa = (document.getElementById('sessionEmpresa').value || '').trim() || 'Sin especificar';
+  state.fecha = document.getElementById('sessionFecha').value || '';
+  var n = parseInt(document.getElementById('numEvaluators').value);
   state.evaluators = [];
-  for (let i = 0; i < n; i++) {
-    const name = (document.getElementById(`evalName${i}`)?.value || '').trim() || `Evaluador ${i+1}`;
-    state.evaluators.push({ name });
+  for (var i = 0; i < n; i++) {
+    var nameEl = document.getElementById('evalName' + i);
+    var name = nameEl ? (nameEl.value || '').trim() : '';
+    state.evaluators.push({ name: name || ('Evaluador ' + (i+1)) });
   }
+
+  var oldScores = state.scores;
+  var oldProjects = state.projects;
+
   state.projects = [];
-  document.querySelectorAll('.project-entry').forEach(el => {
-    const m = el.id.match(/project-entry-(\d+)/);
+  document.querySelectorAll('.project-entry').forEach(function(el) {
+    var m = el.id.match(/project-entry-(\d+)/);
     if (!m) return;
-    const id = m[1];
-    const title = (document.getElementById(`proj-title-${id}`)?.value || '').trim();
-    const desc = (document.getElementById(`proj-desc-${id}`)?.value || '').trim();
-    const shortName = (document.getElementById(`proj-short-${id}`)?.value || '').trim();
-    if (title) state.projects.push({ title, desc, shortName: shortName || `P${state.projects.length + 1}` });
+    var id = m[1];
+    var title = (document.getElementById('proj-title-' + id) || {}).value || '';
+    title = title.trim();
+    var desc = (document.getElementById('proj-desc-' + id) || {}).value || '';
+    desc = desc.trim();
+    var shortName = (document.getElementById('proj-short-' + id) || {}).value || '';
+    shortName = shortName.trim();
+    if (title) state.projects.push({ title: title, desc: desc, shortName: shortName || ('P' + (state.projects.length + 1)) });
   });
-  state.scores = {};
-  state.evaluators.forEach((_, ei) => {
-    state.scores[ei] = {};
-    state.projects.forEach((_, pi) => { state.scores[ei][pi] = {}; });
-  });
+
+  if (Object.keys(oldScores).length > 0 && oldProjects.length === state.projects.length) {
+    // keep existing scores
+  } else {
+    state.scores = {};
+    state.evaluators.forEach(function(_, ei) {
+      state.scores[ei] = {};
+      state.projects.forEach(function(_, pi) { state.scores[ei][pi] = {}; });
+    });
+  }
 }
 
 function startEvaluation() {
@@ -401,114 +725,102 @@ function startEvaluation() {
   if (!state.projects.length) { alert('Agrega al menos un proyecto.'); return; }
   state.currentEval = 0; state.currentProject = 0;
   showScreen('screen-evaluate'); renderEvalScreen();
+  scheduleAutoSave();
 }
 
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
-  const steps = { 'screen-setup': ['Configuración', 8], 'screen-evaluate': ['Evaluación', 55], 'screen-results': ['Resultados', 100] };
-  const [label, pct] = steps[id];
+  var steps = { 'screen-setup': ['Configuración', 8], 'screen-evaluate': ['Evaluación', 55], 'screen-results': ['Resultados', 100] };
+  var label = steps[id][0], pct = steps[id][1];
   document.getElementById('stepBadge').textContent = label;
   document.getElementById('progressFill').style.width = pct + '%';
   window.scrollTo(0, 0);
 }
 
-function goBack() { showScreen('screen-setup'); }
+function goBack() { showScreen('screen-setup'); loadSessionList(); }
 function goBackToEval() { showScreen('screen-evaluate'); renderEvalScreen(); }
 function renderEvalScreen() { renderEvalTabs(); renderProjPills(); renderProjectCard(); updateNavButtons(); renderProgressIndicator(); }
 
 function renderEvalTabs() {
-  document.getElementById('evalTabs').innerHTML = state.evaluators.map((ev, i) => {
-    const done = countDoneForEval(i), total = state.projects.length * CRITERIA.length;
-    const pct = total ? Math.round(done / total * 100) : 0;
-    return `<div class="eval-tab ${i === state.currentEval ? 'active' : ''}" onclick="switchEval(${i})">
-      <div class="tab-name">${ev.name}</div>
-      <div class="tab-status">${pct}% completado</div>
-    </div>`;
+  document.getElementById('evalTabs').innerHTML = state.evaluators.map(function(ev, i) {
+    var done = countDoneForEval(i), total = state.projects.length * CRITERIA.length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    return '<div class="eval-tab ' + (i === state.currentEval ? 'active' : '') + '" onclick="switchEval(' + i + ')">'
+      + '<div class="tab-name">' + ev.name + '</div>'
+      + '<div class="tab-status">' + pct + '% completado</div></div>';
   }).join('');
 }
 
 function countDoneForEval(ei) {
-  let c = 0;
-  state.projects.forEach((_, pi) => CRITERIA.forEach(cr => { if (state.scores[ei]?.[pi]?.[cr.id]) c++; }));
+  var c = 0;
+  state.projects.forEach(function(_, pi) {
+    CRITERIA.forEach(function(cr) { if (state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]) c++; });
+  });
   return c;
 }
 
 function renderProjPills() {
-  document.getElementById('projNav').innerHTML = state.projects.map((proj, i) => {
-    const done = CRITERIA.every(cr => state.scores[state.currentEval]?.[i]?.[cr.id]);
-    return `<div class="proj-pill ${i === state.currentProject ? 'active' : ''} ${done ? 'done' : ''}" onclick="goToProject(${i})">${proj.shortName}</div>`;
+  document.getElementById('projNav').innerHTML = state.projects.map(function(proj, i) {
+    var done = CRITERIA.every(function(cr) { return state.scores[state.currentEval] && state.scores[state.currentEval][i] && state.scores[state.currentEval][i][cr.id]; });
+    return '<div class="proj-pill ' + (i === state.currentProject ? 'active' : '') + ' ' + (done ? 'done' : '') + '" onclick="goToProject(' + i + ')">' + proj.shortName + '</div>';
   }).join('');
 }
 
 function renderProjectCard() {
-  const ei = state.currentEval, pi = state.currentProject, proj = state.projects[pi];
+  var ei = state.currentEval, pi = state.currentProject, proj = state.projects[pi];
   if (!proj) return;
 
-  const renderGroup = cat => CRITERIA.filter(c => c.cat === cat).map(cr => {
-    const val = state.scores[ei]?.[pi]?.[cr.id] || 0;
-    const stars = [1,2,3,4,5].map(v =>
-      `<div class="star ${val >= v ? 'selected' : ''}" onclick="setScore(${ei},${pi},'${cr.id}',${v})">${v}</div>`
-    ).join('');
-    return `<div class="criterion-row">
-      <div>
-        <div class="criterion-text"><strong>${cr.name}</strong></div>
-        <div class="criterion-sub">${cr.scale}</div>
-      </div>
-      <div class="star-rating">${stars}</div>
-    </div>`;
-  }).join('');
+  var renderGroup = function(cat) {
+    return CRITERIA.filter(function(c) { return c.cat === cat; }).map(function(cr) {
+      var val = (state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]) || 0;
+      var stars = [1,2,3,4,5].map(function(v) {
+        return '<div class="star ' + (val >= v ? 'selected' : '') + '" onclick="setScore(' + ei + ',' + pi + ',\'' + cr.id + '\',' + v + ')">' + v + '</div>';
+      }).join('');
+      return '<div class="criterion-row"><div><div class="criterion-text"><strong>' + cr.name + '</strong></div><div class="criterion-sub">' + cr.scale + '</div></div><div class="star-rating">' + stars + '</div></div>';
+    }).join('');
+  };
 
-  const avgScore = computeProjectScore(ei, pi);
-  const criteriaAnswered = CRITERIA.filter(cr => state.scores[ei]?.[pi]?.[cr.id]).length;
+  var avgScore = computeProjectScore(ei, pi);
+  var criteriaAnswered = CRITERIA.filter(function(cr) { return state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]; }).length;
 
-  document.getElementById('projectArea').innerHTML = `
-    <div class="project-card">
-      <div class="proj-header">
-        <div class="proj-header-num">${pi + 1}</div>
-        <div class="proj-title-block">
-          <div class="proj-label">Proyecto ${pi + 1} · ${proj.shortName}</div>
-          <h3>${proj.title}</h3>
-          ${proj.desc ? `<div class="proj-description">${proj.desc}</div>` : ''}
-        </div>
-        <div style="margin-left:auto;text-align:right;flex-shrink:0;">
-          <div style="font-size:0.62rem;color:rgba(26,19,0,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;">Criterios</div>
-          <div style="font-size:1.4rem;font-weight:900;color:var(--navy);">${criteriaAnswered}/${CRITERIA.length}</div>
-        </div>
-      </div>
-      <div class="criteria-section">
-        ${CATEGORIES.map(cat => `
-          <div class="section-divider"><span class="section-badge">${CAT_ICONS[cat]} ${cat}</span></div>
-          ${renderGroup(cat)}
-        `).join('')}
-      </div>
-      <div class="proj-score-bar">
-        <div class="score-chip">
-          <div class="sc-val">${avgScore}</div>
-          <div class="sc-label">Nota del proyecto</div>
-        </div>
-        <div class="score-divider"></div>
-        <div style="flex:1;">
-          <div style="font-size:0.72rem;color:var(--text-mid);font-weight:600;margin-bottom:6px;">Progreso de calificación</div>
-          <div style="background:#f0e8c0;border-radius:4px;height:7px;overflow:hidden;">
-            <div style="height:7px;border-radius:4px;background:linear-gradient(90deg,var(--yellow),var(--navy));width:${criteriaAnswered / CRITERIA.length * 100}%;transition:width 0.3s;"></div>
-          </div>
-        </div>
-        <div style="font-size:0.78rem;color:var(--text-mid);font-weight:600;">Calificador: <strong style="color:var(--navy);">${state.evaluators[ei].name}</strong></div>
-      </div>
-    </div>`;
+  document.getElementById('projectArea').innerHTML =
+    '<div class="project-card">'
+    + '<div class="proj-header">'
+    + '<div class="proj-header-num">' + (pi + 1) + '</div>'
+    + '<div class="proj-title-block"><div class="proj-label">Proyecto ' + (pi+1) + ' · ' + proj.shortName + '</div><h3>' + proj.title + '</h3>'
+    + (proj.desc ? '<div class="proj-description">' + proj.desc + '</div>' : '') + '</div>'
+    + '<div style="margin-left:auto;text-align:right;flex-shrink:0;">'
+    + '<div style="font-size:0.62rem;color:rgba(26,19,0,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;">Criterios</div>'
+    + '<div style="font-size:1.4rem;font-weight:900;color:var(--navy);">' + criteriaAnswered + '/' + CRITERIA.length + '</div>'
+    + '</div></div>'
+    + '<div class="criteria-section">'
+    + CATEGORIES.map(function(cat) {
+        return '<div class="section-divider"><span class="section-badge">' + CAT_ICONS[cat] + ' ' + cat + '</span></div>' + renderGroup(cat);
+      }).join('')
+    + '</div>'
+    + '<div class="proj-score-bar">'
+    + '<div class="score-chip"><div class="sc-val">' + avgScore + '</div><div class="sc-label">Nota del proyecto</div></div>'
+    + '<div class="score-divider"></div>'
+    + '<div style="flex:1;"><div style="font-size:0.72rem;color:var(--text-mid);font-weight:600;margin-bottom:6px;">Progreso de calificación</div>'
+    + '<div style="background:#f0e8c0;border-radius:4px;height:7px;overflow:hidden;">'
+    + '<div style="height:7px;border-radius:4px;background:linear-gradient(90deg,var(--yellow),var(--navy));width:' + (criteriaAnswered / CRITERIA.length * 100) + '%;transition:width 0.3s;"></div>'
+    + '</div></div>'
+    + '<div style="font-size:0.78rem;color:var(--text-mid);font-weight:600;">Calificador: <strong style="color:var(--navy);">' + state.evaluators[ei].name + '</strong></div>'
+    + '</div></div>';
 }
 
 function computeProjectScore(ei, pi) {
-  const sc = state.scores[ei]?.[pi] || {};
-  const vals = CRITERIA.map(cr => sc[cr.id] || 0).filter(v => v > 0);
+  var sc = (state.scores[ei] && state.scores[ei][pi]) || {};
+  var vals = CRITERIA.map(function(cr) { return sc[cr.id] || 0; }).filter(function(v) { return v > 0; });
   if (!vals.length) return '—';
-  return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
+  return (vals.reduce(function(a,b){return a+b;},0) / vals.length).toFixed(2);
 }
 
 function setScore(ei, pi, cid, val) {
   state.scores[ei][pi][cid] = val;
   renderProjectCard(); renderProjPills(); renderEvalTabs(); updateNavButtons(); renderProgressIndicator();
+  scheduleAutoSave();
 }
 
 function switchEval(idx) { state.currentEval = idx; state.currentProject = 0; renderEvalScreen(); }
@@ -526,50 +838,59 @@ function prevProject() {
 }
 
 function updateNavButtons() {
-  const pi = state.currentProject, total = state.projects.length;
+  var pi = state.currentProject, total = state.projects.length;
   document.getElementById('btnPrev').style.display = pi === 0 ? 'none' : 'inline-flex';
   document.getElementById('btnNext').style.display = pi === total - 1 ? 'none' : 'inline-flex';
-  const allDone = state.evaluators.every((_, ei) => state.projects.every((_, idx) => CRITERIA.every(cr => state.scores[ei]?.[idx]?.[cr.id])));
+  var allDone = state.evaluators.every(function(_, ei) {
+    return state.projects.every(function(_, idx) {
+      return CRITERIA.every(function(cr) { return state.scores[ei] && state.scores[ei][idx] && state.scores[ei][idx][cr.id]; });
+    });
+  });
   document.getElementById('btnResults').style.display = allDone ? 'inline-flex' : 'none';
 }
 
 function renderProgressIndicator() {
-  const el = document.getElementById('progressIndicator');
+  var el = document.getElementById('progressIndicator');
   if (!el) return;
-  const totalCriteria = state.evaluators.length * state.projects.length * CRITERIA.length;
-  let done = 0;
-  state.evaluators.forEach((_, ei) => state.projects.forEach((_, pi) => CRITERIA.forEach(cr => { if (state.scores[ei]?.[pi]?.[cr.id]) done++; })));
-  const pct = totalCriteria ? Math.round(done / totalCriteria * 100) : 0;
-  const allDone = done === totalCriteria;
-  el.innerHTML = `
-    <div style="flex:1;min-width:160px;">
-      <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-mid);margin-bottom:6px;">Progreso general del comité</div>
-      <div style="background:var(--yellow-pale);border-radius:6px;height:8px;overflow:hidden;border:1px solid var(--border);">
-        <div style="height:8px;border-radius:6px;background:linear-gradient(90deg,var(--yellow),var(--navy));width:${pct}%;transition:width 0.4s;"></div>
-      </div>
-    </div>
-    <div style="font-size:1.4rem;font-weight:900;color:var(--navy);min-width:48px;text-align:right;">${pct}%</div>
-    <div style="font-size:0.78rem;color:var(--text-mid);font-weight:600;">${done}/${totalCriteria} criterios</div>
-    ${allDone ? '<div style="background:var(--yellow-light);color:var(--navy);font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--border);">✓ ¡Completo! Ver resultados →</div>' : ''}`;
+  var totalCriteria = state.evaluators.length * state.projects.length * CRITERIA.length;
+  var done = 0;
+  state.evaluators.forEach(function(_, ei) {
+    state.projects.forEach(function(_, pi) {
+      CRITERIA.forEach(function(cr) { if (state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]) done++; });
+    });
+  });
+  var pct = totalCriteria ? Math.round(done / totalCriteria * 100) : 0;
+  var allDone = done === totalCriteria;
+  el.innerHTML = '<div style="flex:1;min-width:160px;">'
+    + '<div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-mid);margin-bottom:6px;">Progreso general del comité</div>'
+    + '<div style="background:var(--yellow-pale);border-radius:6px;height:8px;overflow:hidden;border:1px solid var(--border);">'
+    + '<div style="height:8px;border-radius:6px;background:linear-gradient(90deg,var(--yellow),var(--navy));width:' + pct + '%;transition:width 0.4s;"></div>'
+    + '</div></div>'
+    + '<div style="font-size:1.4rem;font-weight:900;color:var(--navy);min-width:48px;text-align:right;">' + pct + '%</div>'
+    + '<div style="font-size:0.78rem;color:var(--text-mid);font-weight:600;">' + done + '/' + totalCriteria + ' criterios</div>'
+    + (allDone ? '<div style="background:var(--yellow-light);color:var(--navy);font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--border);">✓ ¡Completo! Ver resultados →</div>' : '');
 }
 
 function computeAggregateScores() {
-  return state.projects.map((proj, pi) => {
-    const catScores = {};
-    CATEGORIES.forEach(cat => { catScores[cat] = 0; });
-    let grandTotal = 0, grandCount = 0;
-    CRITERIA.forEach(cr => {
-      let sum = 0, cnt = 0;
-      state.evaluators.forEach((_, ei) => { const v = state.scores[ei]?.[pi]?.[cr.id]; if (v) { sum += v; cnt++; } });
-      const avg = cnt ? sum / cnt : 0;
+  return state.projects.map(function(proj, pi) {
+    var catScores = {};
+    CATEGORIES.forEach(function(cat) { catScores[cat] = 0; });
+    var grandTotal = 0, grandCount = 0;
+    CRITERIA.forEach(function(cr) {
+      var sum = 0, cnt = 0;
+      state.evaluators.forEach(function(_, ei) {
+        var v = state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id];
+        if (v) { sum += v; cnt++; }
+      });
+      var avg = cnt ? sum / cnt : 0;
       catScores[cr.cat] = (catScores[cr.cat] || 0) + avg;
       if (cnt) { grandTotal += avg; grandCount++; }
     });
-    CATEGORIES.forEach(cat => {
-      const cnt = CRITERIA.filter(c => c.cat === cat).length;
+    CATEGORIES.forEach(function(cat) {
+      var cnt = CRITERIA.filter(function(c) { return c.cat === cat; }).length;
       catScores[cat] = cnt ? catScores[cat] / cnt : 0;
     });
-    return { proj, pi, catScores, finalScore: grandCount ? grandTotal / grandCount : 0 };
+    return { proj: proj, pi: pi, catScores: catScores, finalScore: grandCount ? grandTotal / grandCount : 0 };
   });
 }
 
@@ -580,44 +901,48 @@ function getPriorityLabel(score) {
 }
 
 function showResults() {
-  const data = computeAggregateScores();
-  data.sort((a, b) => b.finalScore - a.finalScore);
+  var data = computeAggregateScores();
+  data.sort(function(a, b) { return b.finalScore - a.finalScore; });
   showScreen('screen-results');
-  const meta = document.getElementById('resultsMetadata');
+  var meta = document.getElementById('resultsMetadata');
   if (meta) {
-    const fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-    meta.innerHTML = `<span style="color:var(--yellow-dark);">🏢 ${state.empresa}</span>${fechaStr ? ` &nbsp;·&nbsp; <span>📅 ${fechaStr}</span>` : ''} &nbsp;·&nbsp; <span>👥 ${state.evaluators.length} evaluador(es)</span> &nbsp;·&nbsp; <span>📋 ${state.projects.length} proyecto(s)</span>`;
+    var fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+    meta.innerHTML = '<span style="color:var(--yellow-dark);">🏢 ' + state.empresa + '</span>'
+      + (fechaStr ? ' &nbsp;·&nbsp; <span>📅 ' + fechaStr + '</span>' : '')
+      + ' &nbsp;·&nbsp; <span>👥 ' + state.evaluators.length + ' evaluador(es)</span>'
+      + ' &nbsp;·&nbsp; <span>📋 ' + state.projects.length + ' proyecto(s)</span>';
   }
   renderBubbleChart(data);
   renderRanking(data);
   renderCategoryBreakdown(data);
   renderEvalBreakdown();
+  saveToSheets(false);
 }
 
 function renderBubbleChart(data) {
-  const canvas = document.getElementById('bubbleChart');
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const cw = Math.min(960, canvas.parentElement.offsetWidth - 56);
-  const rowH = 80, legendH = 50;
-  const n = data.length;
-  const ch = n * rowH + 70 + legendH;
+  var canvas = document.getElementById('bubbleChart');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  var cw = Math.min(960, canvas.parentElement.offsetWidth - 56);
+  var rowH = 80, legendH = 50;
+  var n = data.length;
+  var ch = n * rowH + 70 + legendH;
   canvas.width = cw * dpr; canvas.height = ch * dpr;
   canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
   ctx.scale(dpr, dpr);
 
-  const padL = 130, padR = 60, padT = 40, padB = legendH + 20;
-  const w = cw - padL - padR;
-  const xLow = padL + (1.5 / 4) * w, xMid = padL + (2.5 / 4) * w, xHigh = padL + (3.5 / 4) * w;
+  var padL = 130, padR = 60, padT = 40, padB = legendH + 20;
+  var w = cw - padL - padR;
+  var xLow = padL + (1.5 / 4) * w, xMid = padL + (2.5 / 4) * w, xHigh = padL + (3.5 / 4) * w;
 
   ctx.fillStyle = 'rgba(255,67,67,0.05)'; ctx.fillRect(padL, 0, xLow - padL, ch - padB);
   ctx.fillStyle = 'rgba(255,187,0,0.07)'; ctx.fillRect(xLow, 0, xMid - xLow, ch - padB);
   ctx.fillStyle = 'rgba(255,187,0,0.11)'; ctx.fillRect(xMid, 0, xHigh - xMid, ch - padB);
   ctx.fillStyle = 'rgba(30,180,80,0.07)'; ctx.fillRect(xHigh, 0, padL + w - xHigh, ch - padB);
 
-  const zLabel = (txt, x1, x2, col) => {
+  var zLabel = function(txt, x1, x2, col) {
     ctx.fillStyle = col; ctx.globalAlpha = 0.75;
-    ctx.font = `700 8.5px Montserrat, sans-serif`; ctx.textAlign = 'center';
+    ctx.font = '700 8.5px Montserrat, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(txt, (x1 + x2) / 2, padT - 14); ctx.globalAlpha = 1;
   };
   zLabel('BAJA', padL, xLow, '#cc2222');
@@ -625,53 +950,53 @@ function renderBubbleChart(data) {
   zLabel('MEDIA-ALTA', xMid, xHigh, '#6a6000');
   zLabel('ALTA', xHigh, padL + w, '#1a6020');
 
-  for (let v = 1; v <= 5; v++) {
-    const x = padL + ((v - 1) / 4) * w;
+  for (var v = 1; v <= 5; v++) {
+    var x = padL + ((v - 1) / 4) * w;
     ctx.setLineDash([3, 4]); ctx.strokeStyle = '#e8d98a';
     ctx.beginPath(); ctx.moveTo(x, padT - 6); ctx.lineTo(x, ch - padB); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = '#b0a060'; ctx.font = `600 9px Montserrat, sans-serif`; ctx.textAlign = 'center';
+    ctx.fillStyle = '#b0a060'; ctx.font = '600 9px Montserrat, sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(v + '.00', x, ch - padB + 14);
   }
-  ctx.fillStyle = '#6b5a20'; ctx.font = `700 10px Montserrat, sans-serif`; ctx.textAlign = 'center';
+  ctx.fillStyle = '#6b5a20'; ctx.font = '700 10px Montserrat, sans-serif'; ctx.textAlign = 'center';
   ctx.fillText('NOTA FINAL (1 – 5)', padL + w / 2, ch - padB + 30);
 
-  const COLORS = ['#1A3365','#cc7700','#0FBAE3','#1a6020','#9b2fbf','#cc2222','#007777','#884400','#3a3a9b','#006633'];
-  const maxR = Math.min(28, rowH * 0.38), minR = 10;
+  var COLORS = ['#1A3365','#cc7700','#0FBAE3','#1a6020','#9b2fbf','#cc2222','#007777','#884400','#3a3a9b','#006633'];
+  var maxR = Math.min(28, rowH * 0.38), minR = 10;
 
-  data.forEach((d, i) => {
-    const score = d.finalScore;
-    const x = padL + ((score - 1) / 4) * w;
-    const y = padT + i * rowH + rowH / 2;
-    const r = minR + (score - 1) / 4 * (maxR - minR);
-    const color = COLORS[i % COLORS.length];
+  data.forEach(function(d, i) {
+    var score = d.finalScore;
+    var bx = padL + ((score - 1) / 4) * w;
+    var by = padT + i * rowH + rowH / 2;
+    var r = minR + (score - 1) / 4 * (maxR - minR);
+    var color = COLORS[i % COLORS.length];
 
-    if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,250,225,0.5)'; ctx.fillRect(0, y - rowH / 2, cw, rowH); }
+    if (i % 2 === 0) { ctx.fillStyle = 'rgba(255,250,225,0.5)'; ctx.fillRect(0, by - rowH / 2, cw, rowH); }
 
-    ctx.fillStyle = '#3a2a00'; ctx.font = `700 9.5px Montserrat, sans-serif`; ctx.textAlign = 'right';
-    const label = d.proj.shortName.length > 14 ? d.proj.shortName.substring(0, 13) + '…' : d.proj.shortName;
-    ctx.fillText(label, padL - 10, y + 3.5);
+    ctx.fillStyle = '#3a2a00'; ctx.font = '700 9.5px Montserrat, sans-serif'; ctx.textAlign = 'right';
+    var lbl = d.proj.shortName.length > 14 ? d.proj.shortName.substring(0, 13) + '…' : d.proj.shortName;
+    ctx.fillText(lbl, padL - 10, by + 3.5);
 
     ctx.strokeStyle = color + '55'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
-    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(x - r, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(padL, by); ctx.lineTo(bx - r, by); ctx.stroke();
     ctx.setLineDash([]);
 
-    ctx.beginPath(); ctx.arc(x, y, r + 7, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(bx, by, r + 7, 0, Math.PI * 2);
     ctx.fillStyle = color + '15'; ctx.fill();
 
-    const grad = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 1, x, y, r);
+    var grad = ctx.createRadialGradient(bx - r * 0.3, by - r * 0.3, 1, bx, by, r);
     grad.addColorStop(0, color + 'ee'); grad.addColorStop(1, color + '99');
-    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2);
     ctx.fillStyle = grad; ctx.fill();
     ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
 
-    const fs = Math.max(7, Math.min(10, r * 0.55));
-    ctx.fillStyle = 'white'; ctx.font = `900 ${fs}px Montserrat, sans-serif`; ctx.textAlign = 'center';
-    ctx.fillText(score.toFixed(1), x, y + 3);
+    var fs = Math.max(7, Math.min(10, r * 0.55));
+    ctx.fillStyle = 'white'; ctx.font = '900 ' + fs + 'px Montserrat, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(score.toFixed(1), bx, by + 3);
 
-    const [plabel] = getPriorityLabel(score);
-    ctx.fillStyle = color; ctx.font = `600 8.5px Montserrat, sans-serif`; ctx.textAlign = 'left';
-    ctx.fillText(plabel, x + r + 8, y + 3.5);
+    var plbl = getPriorityLabel(score)[0];
+    ctx.fillStyle = color; ctx.font = '600 8.5px Montserrat, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(plbl, bx + r + 8, by + 3.5);
   });
 
   ctx.strokeStyle = '#e8d98a'; ctx.lineWidth = 1.5; ctx.setLineDash([]);
@@ -679,63 +1004,59 @@ function renderBubbleChart(data) {
 }
 
 function renderRanking(data) {
-  document.getElementById('rankTable').innerHTML = `
-    <thead><tr>
-      <th>#</th><th>Proyecto</th>
-      ${CATEGORIES.map(c => `<th>${CAT_ICONS[c]} ${c}</th>`).join('')}
-      <th>Nota Final</th><th>Prioridad</th>
-    </tr></thead>
-    <tbody>${data.map((d, i) => {
-      const medals = ['🥇','🥈','🥉'], [label, cls] = getPriorityLabel(d.finalScore), pct = (d.finalScore / 5 * 100).toFixed(0);
-      return `<tr>
-        <td><span>${medals[i] || ''}</span> <span class="rank-pos">${i + 1}</span></td>
-        <td><strong>${d.proj.shortName}</strong><div style="font-size:0.75rem;color:var(--text-mid);margin-top:2px;">${d.proj.title.substring(0,55)}${d.proj.title.length > 55 ? '...' : ''}</div></td>
-        ${CATEGORIES.map(cat => `<td style="font-weight:700;color:var(--navy);">${d.catScores[cat].toFixed(2)}</td>`).join('')}
-        <td><div class="score-bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><div class="score-num">${d.finalScore.toFixed(2)}</div></div></td>
-        <td><span class="tag-cell ${cls}">${label}</span></td>
-      </tr>`;
-    }).join('')}</tbody>`;
+  var medals = ['🥇','🥈','🥉'];
+  var headCats = CATEGORIES.map(function(c) { return '<th>' + CAT_ICONS[c] + ' ' + c + '</th>'; }).join('');
+  var rows = data.map(function(d, i) {
+    var pl = getPriorityLabel(d.finalScore);
+    var pct = (d.finalScore / 5 * 100).toFixed(0);
+    var catCells = CATEGORIES.map(function(cat) { return '<td style="font-weight:700;color:var(--navy);">' + d.catScores[cat].toFixed(2) + '</td>'; }).join('');
+    return '<tr>'
+      + '<td><span>' + (medals[i]||'') + '</span> <span class="rank-pos">' + (i+1) + '</span></td>'
+      + '<td><strong>' + d.proj.shortName + '</strong><div style="font-size:0.75rem;color:var(--text-mid);margin-top:2px;">' + d.proj.title.substring(0,55) + (d.proj.title.length>55?'...':'') + '</div></td>'
+      + catCells
+      + '<td><div class="score-bar-cell"><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div><div class="score-num">' + d.finalScore.toFixed(2) + '</div></div></td>'
+      + '<td><span class="tag-cell ' + pl[1] + '">' + pl[0] + '</span></td></tr>';
+  }).join('');
+  document.getElementById('rankTable').innerHTML = '<thead><tr><th>#</th><th>Proyecto</th>' + headCats + '<th>Nota Final</th><th>Prioridad</th></tr></thead><tbody>' + rows + '</tbody>';
 }
 
 function renderCategoryBreakdown(data) {
-  document.getElementById('catGrid').innerHTML = CATEGORIES.map(cat => `
-    <div class="cat-col">
-      <h4>${CAT_ICONS[cat]} ${cat}</h4>
-      ${[...data].sort((a, b) => b.catScores[cat] - a.catScores[cat]).map(d => `
-        <div class="cat-row">
-          <div class="cat-proj" title="${d.proj.title}">${d.proj.shortName}</div>
-          <div class="cat-score">${d.catScores[cat].toFixed(2)}</div>
-        </div>`).join('')}
-    </div>`).join('');
+  document.getElementById('catGrid').innerHTML = CATEGORIES.map(function(cat) {
+    var sorted = data.slice().sort(function(a, b) { return b.catScores[cat] - a.catScores[cat]; });
+    var rows = sorted.map(function(d) {
+      return '<div class="cat-row"><div class="cat-proj" title="' + d.proj.title + '">' + d.proj.shortName + '</div><div class="cat-score">' + d.catScores[cat].toFixed(2) + '</div></div>';
+    }).join('');
+    return '<div class="cat-col"><h4>' + CAT_ICONS[cat] + ' ' + cat + '</h4>' + rows + '</div>';
+  }).join('');
 }
 
 function renderEvalBreakdown() {
-  document.getElementById('evalBreakdown').innerHTML = state.evaluators.map((ev, ei) => {
-    const done = countDoneForEval(ei), total = state.projects.length * CRITERIA.length;
-    const pct = total ? Math.round(done / total * 100) : 0;
-    return `<div class="eval-card"><div class="eval-name">${ev.name}</div><div class="eval-stat">${pct}%</div><div class="eval-sub">${done}/${total} criterios evaluados</div></div>`;
+  document.getElementById('evalBreakdown').innerHTML = state.evaluators.map(function(ev, ei) {
+    var done = countDoneForEval(ei), total = state.projects.length * CRITERIA.length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    return '<div class="eval-card"><div class="eval-name">' + ev.name + '</div><div class="eval-stat">' + pct + '%</div><div class="eval-sub">' + done + '/' + total + ' criterios evaluados</div></div>';
   }).join('');
 }
 
 function exportCSV() {
-  const data = computeAggregateScores();
-  data.sort((a, b) => b.finalScore - a.finalScore);
-  const fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-  let csv = `Empresa,${state.empresa}\nFecha,${fechaStr}\nEvaluadores,${state.evaluators.map(e => e.name).join(' | ')}\n\n`;
-  csv += `#,Proyecto,Descripción,${CATEGORIES.join(',')},Nota Final,Prioridad\n`;
-  data.forEach((d, i) => {
-    const [label] = getPriorityLabel(d.finalScore);
-    csv += `${i+1},"${d.proj.shortName}","${d.proj.title}",${CATEGORIES.map(c => d.catScores[c].toFixed(2)).join(',')},${d.finalScore.toFixed(2)},"${label}"\n`;
+  var data = computeAggregateScores();
+  data.sort(function(a, b) { return b.finalScore - a.finalScore; });
+  var fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  var csv = 'Empresa,' + state.empresa + '\nFecha,' + fechaStr + '\nEvaluadores,' + state.evaluators.map(function(e){return e.name;}).join(' | ') + '\n\n';
+  csv += '#,Proyecto,Descripción,' + CATEGORIES.join(',') + ',Nota Final,Prioridad\n';
+  data.forEach(function(d, i) {
+    var pl = getPriorityLabel(d.finalScore)[0];
+    csv += (i+1) + ',"' + d.proj.shortName + '","' + d.proj.title + '",' + CATEGORIES.map(function(c){return d.catScores[c].toFixed(2);}).join(',') + ',' + d.finalScore.toFixed(2) + ',"' + pl + '"\n';
   });
-  csv += `\n\nDetalle por evaluador\nEvaluador,Proyecto,${CRITERIA.map(c => c.name).join(',')}\n`;
-  state.evaluators.forEach((ev, ei) => {
-    state.projects.forEach((proj, pi) => {
-      csv += `"${ev.name}","${proj.shortName}",${CRITERIA.map(cr => state.scores[ei]?.[pi]?.[cr.id] || '').join(',')}\n`;
+  csv += '\n\nDetalle por evaluador\nEvaluador,Proyecto,' + CRITERIA.map(function(c){return c.name;}).join(',') + '\n';
+  state.evaluators.forEach(function(ev, ei) {
+    state.projects.forEach(function(proj, pi) {
+      csv += '"' + ev.name + '","' + proj.shortName + '",' + CRITERIA.map(function(cr){return (state.scores[ei]&&state.scores[ei][pi]&&state.scores[ei][pi][cr.id])||'';}).join(',') + '\n';
     });
   });
   try {
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const a = document.createElement('a');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'evaluacion-proyectos-idi-plynn.csv';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -743,65 +1064,56 @@ function exportCSV() {
 }
 
 function showCSVModal(csv) {
-  const overlay = document.createElement('div');
+  var overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-  overlay.innerHTML = `<div style="background:white;border-radius:16px;padding:28px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:Montserrat,sans-serif;">
-    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:#cc9500;font-weight:700;margin-bottom:6px;">Exportar CSV</div>
-    <div style="font-size:1.1rem;font-weight:900;color:#0f1f3d;margin-bottom:16px;">Copia el contenido</div>
-    <textarea id="csvContent" readonly style="width:100%;height:200px;font-family:monospace;font-size:0.75rem;border:1.5px solid #e8d98a;border-radius:8px;padding:12px;resize:none;background:#fdf9ee;">${csv}</textarea>
-    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
-      <button onclick="document.getElementById('csvContent').select();document.execCommand('copy');this.textContent='✓ Copiado!';"
-        style="background:#FFBB00;color:#0f1f3d;border:none;border-radius:8px;padding:10px 20px;font-family:Montserrat,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">📋 Copiar todo</button>
-      <button onclick="this.closest('[style*=fixed]').remove();"
-        style="background:#1A3365;color:white;border:none;border-radius:8px;padding:10px 20px;font-family:Montserrat,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">Cerrar</button>
-    </div>
-  </div>`;
+  overlay.innerHTML = '<div style="background:white;border-radius:16px;padding:28px;max-width:640px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);font-family:Montserrat,sans-serif;">'
+    + '<div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;color:#cc9500;font-weight:700;margin-bottom:6px;">Exportar CSV</div>'
+    + '<div style="font-size:1.1rem;font-weight:900;color:#0f1f3d;margin-bottom:16px;">Copia el contenido</div>'
+    + '<textarea id="csvContent" readonly style="width:100%;height:200px;font-family:monospace;font-size:0.75rem;border:1.5px solid #e8d98a;border-radius:8px;padding:12px;resize:none;background:#fdf9ee;">' + csv + '</textarea>'
+    + '<div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">'
+    + '<button onclick="document.getElementById(\'csvContent\').select();document.execCommand(\'copy\');this.textContent=\'✓ Copiado!\';" style="background:#FFBB00;color:#0f1f3d;border:none;border-radius:8px;padding:10px 20px;font-family:Montserrat,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">📋 Copiar todo</button>'
+    + '<button onclick="this.closest(\'[style*=fixed]\').remove();" style="background:#1A3365;color:white;border:none;border-radius:8px;padding:10px 20px;font-family:Montserrat,sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;">Cerrar</button>'
+    + '</div></div>';
   document.body.appendChild(overlay);
-  setTimeout(() => document.getElementById('csvContent')?.select(), 100);
+  setTimeout(function() { var ta = document.getElementById('csvContent'); if(ta) ta.select(); }, 100);
 }
 
 function printResults() {
-  const data = computeAggregateScores();
-  data.sort((a, b) => b.finalScore - a.finalScore);
-  const fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
-  const rows = data.map((d, i) => {
-    const medals = ['🥇','🥈','🥉'], [label] = getPriorityLabel(d.finalScore);
-    return `<tr>
-      <td>${medals[i] || ''} ${i+1}</td>
-      <td><strong>${d.proj.shortName}</strong><br><span style="font-size:10px;color:#666;">${d.proj.title}</span></td>
-      ${CATEGORIES.map(c => `<td style="text-align:center;">${d.catScores[c].toFixed(2)}</td>`).join('')}
-      <td style="text-align:center;"><strong>${d.finalScore.toFixed(2)}</strong></td>
-      <td>${label}</td>
-    </tr>`;
+  var data = computeAggregateScores();
+  data.sort(function(a, b) { return b.finalScore - a.finalScore; });
+  var fechaStr = state.fecha ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+  var medals = ['🥇','🥈','🥉'];
+  var catHeaders = CATEGORIES.map(function(c) { return '<th>' + c + '</th>'; }).join('');
+  var rows = data.map(function(d, i) {
+    var pl = getPriorityLabel(d.finalScore)[0];
+    var catCells = CATEGORIES.map(function(c) { return '<td style="text-align:center;">' + d.catScores[c].toFixed(2) + '</td>'; }).join('');
+    return '<tr><td>' + (medals[i]||'') + ' ' + (i+1) + '</td>'
+      + '<td><strong>' + d.proj.shortName + '</strong><br><span style="font-size:10px;color:#666;">' + d.proj.title + '</span></td>'
+      + catCells
+      + '<td style="text-align:center;"><strong>' + d.finalScore.toFixed(2) + '</strong></td>'
+      + '<td>' + pl + '</td></tr>';
   }).join('');
 
-  const win = window.open('', '_blank', 'width=1100,height=700');
+  var win = window.open('', '_blank', 'width=1100,height=700');
   if (!win) { alert('Permite ventanas emergentes para imprimir.'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>I+D+i - ${state.empresa}</title>
-    <style>
-      body{font-family:Arial,sans-serif;padding:32px;color:#1a1200;}
-      h1{color:#cc9500;font-size:20px;margin-bottom:4px;}
-      .meta{color:#666;font-size:12px;margin-bottom:20px;}
-      table{width:100%;border-collapse:collapse;font-size:11px;}
-      th{background:#FFBB00;color:#1A3365;padding:8px 10px;text-align:left;}
-      td{padding:8px 10px;border-bottom:1px solid #f0e8c0;vertical-align:top;}
-      tr:nth-child(even) td{background:#fffdf2;}
-      .footer{margin-top:20px;font-size:10px;color:#999;border-top:1px solid #f0e8c0;padding-top:10px;}
-    </style>
-    </head><body>
-    <h1>Evaluación de Proyectos I+D+i · Plynn</h1>
-    <div class="meta">🏢 ${state.empresa} · 📅 ${fechaStr} · 👥 ${state.evaluators.map(e => e.name).join(', ')}</div>
-    <table>
-      <thead><tr><th>#</th><th>Proyecto</th>${CATEGORIES.map(c => `<th>${c}</th>`).join('')}<th>Nota Final</th><th>Prioridad</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="footer">Generado por Plynn · Plataforma de Innovación</div>
-    <script>window.onload=function(){window.print();}<\/script>
-    </body></html>`);
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>I+D+i - ' + state.empresa + '</title>'
+    + '<style>body{font-family:Arial,sans-serif;padding:32px;color:#1a1200;}h1{color:#cc9500;font-size:20px;margin-bottom:4px;}.meta{color:#666;font-size:12px;margin-bottom:20px;}table{width:100%;border-collapse:collapse;font-size:11px;}th{background:#FFBB00;color:#1A3365;padding:8px 10px;text-align:left;}td{padding:8px 10px;border-bottom:1px solid #f0e8c0;vertical-align:top;}tr:nth-child(even) td{background:#fffdf2;}.footer{margin-top:20px;font-size:10px;color:#999;border-top:1px solid #f0e8c0;padding-top:10px;}</style>'
+    + '</head><body>'
+    + '<h1>Evaluación de Proyectos I+D+i · Plynn</h1>'
+    + '<div class="meta">🏢 ' + state.empresa + ' · 📅 ' + fechaStr + ' · 👥 ' + state.evaluators.map(function(e){return e.name;}).join(', ') + '</div>'
+    + '<table><thead><tr><th>#</th><th>Proyecto</th>' + catHeaders + '<th>Nota Final</th><th>Prioridad</th></tr></thead><tbody>' + rows + '</tbody></table>'
+    + '<div class="footer">Generado por Plynn · Plataforma de Innovación</div>'
+    + '<scr' + 'ipt>window.onload=function(){window.print();}<\/scr' + 'ipt>'
+    + '</body></html>');
   win.document.close();
 }
 
-function init() { renderEvaluators(); addProject('','','P1'); addProject('','','P2'); }
+function init() {
+  renderEvaluators();
+  addProject('','','P1');
+  addProject('','','P2');
+  loadSessionList();
+}
 init();
 </script>
 </body>
