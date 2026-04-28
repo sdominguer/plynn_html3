@@ -129,7 +129,8 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
 .criterion-row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border-soft); }
 .criterion-row:last-child { border-bottom: none; }
 .criterion-text strong { color: var(--navy); font-weight: 700; font-size: 0.85rem; }
-.criterion-sub { font-size: 0.72rem; color: var(--text-mid); margin-top: 3px; font-style: italic; }
+.criterion-desc { font-size: 0.72rem; color: var(--text-mid); margin-top: 2px; line-height: 1.45; }
+.criterion-sub { font-size: 0.68rem; color: #9a8a50; margin-top: 3px; font-style: italic; }
 
 .star-rating { display: flex; gap: 4px; flex-shrink: 0; }
 .star { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border-soft); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; transition: all 0.12s; color: #ccc; font-family: 'Montserrat', sans-serif; }
@@ -153,16 +154,17 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
 
 .ranking-wrap { background: white; border: 1.5px solid var(--border-soft); border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px var(--shadow); margin-bottom: 32px; }
 .ranking-wrap h3 { font-size: 0.85rem; font-weight: 700; color: var(--navy); padding: 20px 24px; border-bottom: 1.5px solid var(--border-soft); text-transform: uppercase; letter-spacing: 0.06em; }
-.rank-table { width: 100%; border-collapse: collapse; }
-.rank-table th { background: var(--yellow-light); color: var(--yellow-dark); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; padding: 11px 16px; text-align: left; border-bottom: 1.5px solid var(--border); font-weight: 700; }
-.rank-table td { padding: 13px 16px; border-bottom: 1px solid #f0e8c0; font-size: 0.87rem; }
+.ranking-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.rank-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+.rank-table th { background: var(--yellow-light); color: var(--yellow-dark); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 12px; text-align: left; border-bottom: 1.5px solid var(--border); font-weight: 700; white-space: nowrap; }
+.rank-table td { padding: 12px 12px; border-bottom: 1px solid #f0e8c0; font-size: 0.82rem; }
 .rank-table tr:last-child td { border-bottom: none; }
 .rank-table tr:hover td { background: var(--yellow-pale); }
 .rank-pos { font-weight: 900; font-size: 1.3rem; color: var(--navy); }
-.score-bar-cell { display: flex; align-items: center; gap: 10px; }
-.bar-track { flex: 1; height: 8px; background: #f0e8c0; border-radius: 4px; min-width: 80px; }
+.score-bar-cell { display: flex; align-items: center; gap: 8px; min-width: 120px; }
+.bar-track { flex: 1; height: 8px; background: #f0e8c0; border-radius: 4px; min-width: 60px; }
 .bar-fill { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--yellow-mid), var(--navy)); transition: width 0.6s; }
-.score-num { font-weight: 700; font-size: 0.85rem; min-width: 40px; text-align: right; color: var(--navy); }
+.score-num { font-weight: 700; font-size: 0.85rem; min-width: 36px; text-align: right; color: var(--navy); }
 .tag-cell { padding: 3px 10px; border-radius: 12px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; display: inline-block; letter-spacing: 0.04em; }
 .priority-high { background: #e0f7e0; color: #1a6020; }
 .priority-mid { background: var(--yellow-light); color: #7a5500; }
@@ -279,10 +281,6 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
       <div id="sessionListArea">
         <div style="text-align:center;padding:16px;color:var(--text-mid);font-size:0.82rem;">Cargando sesiones...</div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:14px;">
-        <button class="btn btn-sm btn-yellow" onclick="loadSessionList()" style="flex:1;">🔄 Actualizar</button>
-        <button class="btn btn-sm btn-secondary" onclick="newSession()" style="flex:1;">＋ Nueva sesión</button>
-      </div>
     </div>
 
     <div class="form-grid" style="margin-bottom:20px;">
@@ -355,7 +353,9 @@ button.del-btn:hover { background: var(--red-light); border-color: var(--red); }
     </div>
     <div class="ranking-wrap">
       <h3>🏆 Ranking General de Proyectos</h3>
-      <table class="rank-table" id="rankTable"></table>
+      <div class="ranking-scroll">
+        <table class="rank-table" id="rankTable"></table>
+      </div>
     </div>
     <div class="category-results">
       <h3>📂 Detalle por Categoría de Criterios</h3>
@@ -383,22 +383,22 @@ var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyenLGyqpwNFR3GRJ
 // ============================================================
 
 var CRITERIA = [
-  {id:'c01', cat:'Tecnología', name:'Madurez de la tecnología', scale:'1 = Madura · 5 = Emergente'},
-  {id:'c02', cat:'Tecnología', name:'Tipo de innovación', scale:'1 = Incremental · 5 = Radical'},
-  {id:'c03', cat:'Tecnología', name:'Dominio de la tecnología por la empresa', scale:'1 = No tiene el conocimiento · 5 = Domina el conocimiento'},
-  {id:'c04', cat:'Tecnología', name:'Riesgo técnico', scale:'1 = Alta probabilidad de fracaso · 5 = Baja probabilidad de fracaso'},
-  {id:'c05', cat:'Mercado', name:'Madurez del mercado', scale:'1 = En declinación · 5 = En crecimiento'},
-  {id:'c06', cat:'Mercado', name:'Competencia del mercado', scale:'1 = Alta competencia · 5 = Baja competencia'},
-  {id:'c07', cat:'Mercado', name:'Conocimiento del mercado por la empresa', scale:'1 = Mercado nuevo · 5 = Mercado conocido'},
-  {id:'c08', cat:'Mercado', name:'Riesgo comercial', scale:'1 = Alta probabilidad de fracaso · 5 = Baja probabilidad de fracaso'},
-  {id:'c09', cat:'Recursos', name:'Infraestructura Tecnológica y Física', scale:'1 = No cuenta con infraestructura · 5 = Sí cuenta con infraestructura'},
-  {id:'c10', cat:'Recursos', name:'Inversión necesaria para la implementación', scale:'1 = Muy alta inversión · 5 = Muy baja inversión'},
-  {id:'c11', cat:'Recursos', name:'Beneficio económico (VPN o similar)', scale:'1 = Muy bajo · 5 = Muy alto'},
-  {id:'c12', cat:'Recursos', name:'Tiempo hasta la implementación de la innovación', scale:'1 = Muy largo · 5 = Muy corto'},
-  {id:'c13', cat:'Recursos', name:'Necesita aliados para su desarrollo', scale:'1 = Muchos aliados necesarios · 5 = Ninguno'},
-  {id:'c14', cat:'Impacto', name:'Impacto Ambiental', scale:'1 = Muy negativo · 5 = Muy positivo'},
-  {id:'c15', cat:'Impacto', name:'Impacto social', scale:'1 = Muy negativo · 5 = Muy positivo'},
-  {id:'c16', cat:'Riesgo', name:'Riesgo técnico y comercial (global)', scale:'1 = Muy alta probabilidad de fracaso · 5 = Muy baja probabilidad de fracaso'}
+  {id:'c01', cat:'Tecnología', name:'Madurez de la tecnología', desc:'Nivel de desarrollo de la tecnología, desde experimental hasta completamente probada.', scale:'1 = Madura · 5 = Emergente'},
+  {id:'c02', cat:'Tecnología', name:'Tipo de innovación', desc:'Grado de novedad del proyecto, si es mejora incremental o cambio radical.', scale:'1 = Incremental · 5 = Radical'},
+  {id:'c03', cat:'Tecnología', name:'Dominio de la tecnología por la empresa', desc:'Qué tanto conocimiento y experiencia tiene la empresa sobre la tecnología.', scale:'1 = No tiene el conocimiento · 5 = Domina el conocimiento'},
+  {id:'c04', cat:'Tecnología', name:'Riesgo técnico', desc:'Probabilidad de que el desarrollo falle por dificultades técnicas.', scale:'1 = Alta probabilidad de fracaso · 5 = Baja probabilidad de fracaso'},
+  {id:'c05', cat:'Mercado', name:'Madurez del mercado', desc:'Etapa del mercado objetivo, si está creciendo, estable o en declive.', scale:'1 = En declinación · 5 = En crecimiento'},
+  {id:'c06', cat:'Mercado', name:'Competencia del mercado', desc:'Nivel de rivalidad y cantidad de competidores existentes.', scale:'1 = Alta competencia · 5 = Baja competencia'},
+  {id:'c07', cat:'Mercado', name:'Conocimiento del mercado por la empresa', desc:'Qué tanto entiende la empresa a sus clientes, necesidades y dinámicas del mercado.', scale:'1 = Mercado nuevo · 5 = Mercado conocido'},
+  {id:'c08', cat:'Mercado', name:'Riesgo comercial', desc:'Probabilidad de que el producto no sea aceptado o no genere ventas.', scale:'1 = Alta probabilidad de fracaso · 5 = Baja probabilidad de fracaso'},
+  {id:'c09', cat:'Recursos', name:'Infraestructura Tecnológica y Física', desc:'Disponibilidad de equipos, tecnología y espacios necesarios para ejecutar el proyecto.', scale:'1 = No cuenta con infraestructura · 5 = Sí cuenta con infraestructura'},
+  {id:'c10', cat:'Recursos', name:'Inversión necesaria para la implementación', desc:'Cantidad de recursos económicos requeridos para implementar la innovación.', scale:'1 = Muy alta inversión · 5 = Muy baja inversión'},
+  {id:'c11', cat:'Recursos', name:'Beneficio económico (VPN o similar)', desc:'Potencial de generación de valor financiero (rentabilidad, ingresos, ahorro).', scale:'1 = Muy bajo · 5 = Muy alto'},
+  {id:'c12', cat:'Recursos', name:'Tiempo hasta la implementación de la innovación', desc:'Duración estimada para llevar la innovación al mercado.', scale:'1 = Muy largo · 5 = Muy corto'},
+  {id:'c13', cat:'Recursos', name:'Necesita aliados para su desarrollo', desc:'Grado en que se requieren socios externos para desarrollar o implementar el proyecto.', scale:'1 = Muchos aliados necesarios · 5 = Ninguno'},
+  {id:'c14', cat:'Impacto', name:'Impacto Ambiental', desc:'Efecto del proyecto sobre el medio ambiente (positivo o negativo).', scale:'1 = Muy negativo · 5 = Muy positivo'},
+  {id:'c15', cat:'Impacto', name:'Impacto social', desc:'Contribución del proyecto al bienestar social o a la comunidad.', scale:'1 = Muy negativo · 5 = Muy positivo'},
+  {id:'c16', cat:'Riesgo', name:'Riesgo técnico y comercial (global)', desc:'Evaluación conjunta del riesgo de fallar en lo técnico y en la aceptación del mercado.', scale:'1 = Muy alta probabilidad de fracaso · 5 = Muy baja probabilidad de fracaso'}
 ];
 
 var CATEGORIES = ['Tecnología', 'Mercado', 'Recursos', 'Impacto', 'Riesgo'];
@@ -791,7 +791,11 @@ function renderProjectCard() {
       var stars = [1,2,3,4,5].map(function(v) {
         return '<div class="star ' + (val >= v ? 'selected' : '') + '" onclick="setScore(' + ei + ',' + pi + ',\'' + cr.id + '\',' + v + ')">' + v + '</div>';
       }).join('');
-      return '<div class="criterion-row"><div><div class="criterion-text"><strong>' + cr.name + '</strong></div><div class="criterion-sub">' + cr.scale + '</div></div><div class="star-rating">' + stars + '</div></div>';
+      return '<div class="criterion-row"><div>'
+        + '<div class="criterion-text"><strong>' + cr.name + '</strong></div>'
+        + '<div class="criterion-desc">' + cr.desc + '</div>'
+        + '<div class="criterion-sub">' + cr.scale + '</div>'
+        + '</div><div class="star-rating">' + stars + '</div></div>';
     }).join('');
   };
 
@@ -1023,10 +1027,10 @@ function renderRanking(data) {
   var rows = data.map(function(d, i) {
     var pl = getPriorityLabel(d.finalScore);
     var pct = (d.finalScore / 5 * 100).toFixed(0);
-    var catCells = CATEGORIES.map(function(cat) { return '<td style="font-weight:700;color:var(--navy);">' + d.catScores[cat].toFixed(2) + '</td>'; }).join('');
+    var catCells = CATEGORIES.map(function(cat) { return '<td style="font-weight:700;color:var(--navy);text-align:center;">' + d.catScores[cat].toFixed(2) + '</td>'; }).join('');
     return '<tr>'
       + '<td><span>' + (medals[i]||'') + '</span> <span class="rank-pos">' + (i+1) + '</span></td>'
-      + '<td><strong>' + d.proj.shortName + '</strong><div style="font-size:0.75rem;color:var(--text-mid);margin-top:2px;">' + d.proj.title.substring(0,55) + (d.proj.title.length>55?'...':'') + '</div></td>'
+      + '<td style="min-width:140px;"><strong>' + d.proj.shortName + '</strong><div style="font-size:0.72rem;color:var(--text-mid);margin-top:2px;">' + d.proj.title.substring(0,55) + (d.proj.title.length>55?'...':'') + '</div></td>'
       + catCells
       + '<td><div class="score-bar-cell"><div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div><div class="score-num">' + d.finalScore.toFixed(2) + '</div></div></td>'
       + '<td><span class="tag-cell ' + pl[1] + '">' + pl[0] + '</span></td></tr>';
