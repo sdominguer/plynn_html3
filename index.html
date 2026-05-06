@@ -854,17 +854,20 @@ function prevProject() {
     state.currentProject--; renderProjectCard(); renderProjPills(); updateNavButtons(); window.scrollTo(0, 0);
   }
 }
-
+  
+function isAllDone() {
+  return state.evaluators.every(function(_, ei) {
+    return state.projects.every(function(_, pi) {
+      return CRITERIA.every(function(cr) { return state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id]; });
+    });
+  });
+}
+  
 function updateNavButtons() {
   var pi = state.currentProject, total = state.projects.length;
   document.getElementById('btnPrev').style.display = pi === 0 ? 'none' : 'inline-flex';
   document.getElementById('btnNext').style.display = pi === total - 1 ? 'none' : 'inline-flex';
-  var allDone = state.evaluators.every(function(_, ei) {
-    return state.projects.every(function(_, idx) {
-      return CRITERIA.every(function(cr) { return state.scores[ei] && state.scores[ei][idx] && state.scores[ei][idx][cr.id]; });
-    });
-  });
-  document.getElementById('btnResults').style.display = allDone ? 'inline-flex' : 'none';
+  document.getElementById('btnResults').style.display = isAllDone() ? 'inline-flex' : 'none';
 }
 
 function renderProgressIndicator() {
@@ -886,8 +889,7 @@ function renderProgressIndicator() {
     + '</div></div>'
     + '<div style="font-size:1.4rem;font-weight:900;color:var(--navy);min-width:48px;text-align:right;">' + pct + '%</div>'
     + '<div style="font-size:0.78rem;color:var(--text-mid);font-weight:600;">' + done + '/' + totalCriteria + ' criterios</div>'
-    + (allDone ? '<div style="background:var(--yellow-light);color:var(--navy);font-size:0.75rem;font-weight:700;padding:5px 12px;border-radius:20px;border:1px solid var(--border);">✓ ¡Completo! Ver resultados →</div>' : '');
-}
+    + (allDone ? '<button onclick="showResults()" style="background:var(--yellow);color:var(--navy);font-size:0.75rem;font-weight:700;padding:8px 16px;border-radius:20px;border:1.5px solid var(--yellow);cursor:pointer;font-family:Montserrat,sans-serif;transition:all 0.15s;box-shadow:0 2px 8px rgba(255,187,0,0.3);">🏆 ¡Completo! Ver resultados →</button>' : '');
 
 function computeAggregateScores() {
   return state.projects.map(function(proj, pi) {
