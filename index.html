@@ -1418,37 +1418,300 @@ function showCSVModal(csv) {
 function printResults() {
   var data = computeAggregateScores();
   data.sort(function(a, b) { return b.finalScore - a.finalScore; });
+
   var fechaStr = state.fecha
     ? new Date(state.fecha + 'T12:00:00').toLocaleDateString('es-CO', { year:'numeric', month:'long', day:'numeric' })
-    : '';
-  var medals     = ['🥇','🥈','🥉'];
-  var catHeaders = CATEGORIES.map(function(c) { return '<th>' + c + '</th>'; }).join('');
-  var rows = data.map(function(d, i) {
-    var pl       = getPriorityLabel(d.finalScore)[0];
-    var catCells = CATEGORIES.map(function(c) {
-      return '<td style="text-align:center;">' + d.catScores[c].toFixed(2) + '</td>';
+    : 'Sin fecha';
+
+  var medals = ['🥇','🥈','🥉'];
+
+  // Capture bubble chart as image before opening window
+  var chartImgData = '';
+  var chartCanvas = document.getElementById('bubbleChart');
+  if (chartCanvas && chartCanvas.width > 0) {
+    try { chartImgData = chartCanvas.toDataURL('image/png'); } catch(e) {}
+  }
+
+  // ── 1. PORTADA ────────────────────────────────────────────
+  var portada = '<div class="page cover-page">'
+    + '<div class="cover-header">'
+    + '<svg width="48" height="48" viewBox="0 0 36 36" fill="none">'
+    + '<rect x="5" y="10" width="9" height="20" rx="4.5" fill="rgba(255,255,255,0.5)"/>'
+    + '<rect x="18" y="13" width="9" height="21" rx="4.5" fill="white"/>'
+    + '<circle cx="22.5" cy="7" r="4.5" fill="white"/>'
+    + '</svg>'
+    + '<span class="cover-brand">plynn</span>'
+    + '</div>'
+    + '<div class="cover-body">'
+    + '<div class="cover-eyebrow">Informe de Evaluación · Comité I+D+i</div>'
+    + '<h1 class="cover-title">Ranking de Proyectos<br>de Innovación</h1>'
+    + '<div class="cover-meta-grid">'
+    + '<div class="cover-meta-item"><span class="cmeta-label">Empresa</span><span class="cmeta-val">' + escapeText(state.empresa) + '</span></div>'
+    + '<div class="cover-meta-item"><span class="cmeta-label">Fecha</span><span class="cmeta-val">' + escapeText(fechaStr) + '</span></div>'
+    + '<div class="cover-meta-item"><span class="cmeta-label">Evaluadores</span><span class="cmeta-val">' + state.evaluators.length + '</span></div>'
+    + '<div class="cover-meta-item"><span class="cmeta-label">Proyectos</span><span class="cmeta-val">' + state.projects.length + '</span></div>'
+    + '</div>'
+    + '<div class="cover-evals">' + state.evaluators.map(function(e){ return '<span class="eval-chip">' + escapeText(e.name) + '</span>'; }).join('') + '</div>'
+    + '</div>'
+    + '<div class="cover-footer">Generado por Plynn · Plataforma de Innovación Sostenible</div>'
+    + '</div>';
+
+  // ── 2. MAPA DE PRIORIZACIÓN ───────────────────────────────
+  var mapaSection = '<div class="page">'
+    + '<div class="section-header"><span class="section-icon">📊</span>Mapa de Priorización</div>'
+    + (chartImgData
+        ? '<img src="' + chartImgData + '" style="width:100%;border-radius:8px;border:1px solid #e8d98a;" />'
+        : '<div class="no-chart">Gráfico no disponible</div>')
+    + '<div class="chart-legend">'
+    + '<span class="legend-item low">Baja prioridad (&lt; 2.5)</span>'
+    + '<span class="legend-item mid">Media (2.5 – 3.4)</span>'
+    + '<span class="legend-item high">Alta prioridad (≥ 3.5)</span>'
+    + '</div>'
+    + '</div>';
+
+  // ── 3. RANKING GENERAL ────────────────────────────────────
+  var catThs = CATEGORIES.map(function(c){ return '<th>' + c + '</th>'; }).join('');
+  var rankRows = data.map(function(d, i) {
+    var pl = getPriorityLabel(d.finalScore);
+    var catTds = CATEGORIES.map(function(c){
+      return '<td class="tc">' + d.catScores[c].toFixed(2) + '</td>';
     }).join('');
-    return '<tr>'
-      + '<td>' + (medals[i]||'') + ' ' + (i+1) + '</td>'
-      + '<td><strong>' + escapeText(d.proj.shortName) + '</strong><br>'
-      + '<span style="font-size:10px;color:#666;">' + escapeText(d.proj.title) + '</span></td>'
-      + catCells
-      + '<td style="text-align:center;"><strong>' + d.finalScore.toFixed(2) + '</strong></td>'
-      + '<td>' + pl + '</td></tr>';
+    var barW = (d.finalScore / 5 * 100).toFixed(0);
+    return '<tr class="' + (i % 2 === 0 ? 'even' : '') + '">'
+      + '<td class="tc rank-num">' + (medals[i] || '') + ' ' + (i+1) + '</td>'
+      + '<td><strong>' + escapeText(d.proj.shortName) + '</strong>'
+      + (d.proj.title ? '<div class="proj-sub">' + escapeText(d.proj.title) + '</div>' : '')
+      + (d.proj.desc  ? '<div class="proj-desc">' + escapeText(d.proj.desc)  + '</div>' : '')
+      + '</td>'
+      + catTds
+      + '<td class="tc">'
+      + '<div class="score-cell">'
+      + '<div class="score-bar-wrap"><div class="score-bar-fill" style="width:' + barW + '%"></div></div>'
+      + '<strong class="score-big">' + d.finalScore.toFixed(2) + '</strong>'
+      + '</div></td>'
+      + '<td><span class="priority-badge ' + pl[1] + '">' + pl[0] + '</span></td>'
+      + '</tr>';
   }).join('');
 
-  var win = window.open('', '_blank', 'width=1100,height=700');
-  if (!win) { alert('Permite ventanas emergentes para imprimir.'); return; }
-  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>I+D+i - ' + state.empresa + '</title>'
-    + '<style>body{font-family:Arial,sans-serif;padding:32px;color:#1a1200;}h1{color:#cc9500;font-size:20px;margin-bottom:4px;}.meta{color:#666;font-size:12px;margin-bottom:20px;}table{width:100%;border-collapse:collapse;font-size:11px;}th{background:#FFBB00;color:#1A3365;padding:8px 10px;text-align:left;}td{padding:8px 10px;border-bottom:1px solid #f0e8c0;vertical-align:top;}tr:nth-child(even) td{background:#fffdf2;}.footer{margin-top:20px;font-size:10px;color:#999;border-top:1px solid #f0e8c0;padding-top:10px;}</style>'
+  var rankingSection = '<div class="page">'
+    + '<div class="section-header"><span class="section-icon">🏆</span>Ranking General de Proyectos</div>'
+    + '<table><thead><tr><th>#</th><th>Proyecto</th>' + catThs + '<th>Nota Final</th><th>Prioridad</th></tr></thead>'
+    + '<tbody>' + rankRows + '</tbody></table>'
+    + '</div>';
+
+  // ── 4. DETALLE POR CATEGORÍA ─────────────────────────────
+  var catDetailRows = data.map(function(d, i) {
+    var catTds = CATEGORIES.map(function(c) {
+      var score = d.catScores[c];
+      var bw    = (score / 5 * 100).toFixed(0);
+      return '<td class="tc">'
+        + '<div class="cat-score-wrap">'
+        + '<div class="cat-bar-bg"><div class="cat-bar-fill" style="width:' + bw + '%"></div></div>'
+        + '<span>' + score.toFixed(2) + '</span>'
+        + '</div></td>';
+    }).join('');
+    return '<tr class="' + (i % 2 === 0 ? 'even' : '') + '">'
+      + '<td class="tc rank-num">' + (medals[i]||'') + ' ' + (i+1) + '</td>'
+      + '<td><strong>' + escapeText(d.proj.shortName) + '</strong>'
+      + '<div class="proj-sub">' + escapeText(d.proj.title) + '</div></td>'
+      + catTds
+      + '<td class="tc"><strong>' + d.finalScore.toFixed(2) + '</strong></td>'
+      + '</tr>';
+  }).join('');
+
+  var catSection = '<div class="page">'
+    + '<div class="section-header"><span class="section-icon">📂</span>Detalle por Categoría de Criterios</div>'
+    + '<table><thead><tr><th>#</th><th>Proyecto</th>'
+    + CATEGORIES.map(function(c){ return '<th class="tc">' + CAT_ICONS[c] + ' ' + c + '</th>'; }).join('')
+    + '<th class="tc">Nota Final</th></tr></thead>'
+    + '<tbody>' + catDetailRows + '</tbody></table>'
+    + '</div>';
+
+  // ── 5. PARTICIPACIÓN DEL COMITÉ ───────────────────────────
+  var evalCards = state.evaluators.map(function(ev, ei) {
+    var done  = countDoneForEval(ei);
+    var total = state.projects.length * CRITERIA.length;
+    var pct   = total ? Math.round(done / total * 100) : 0;
+    var avgScores = state.projects.map(function(_, pi) {
+      return parseFloat(computeProjectScore(ei, pi)) || 0;
+    }).filter(function(v){ return v > 0; });
+    var globalAvg = avgScores.length
+      ? (avgScores.reduce(function(a,b){return a+b;},0) / avgScores.length).toFixed(2)
+      : '—';
+    return '<div class="eval-card-print">'
+      + '<div class="ecp-name">' + escapeText(ev.name) + '</div>'
+      + '<div class="ecp-stats">'
+      + '<div class="ecp-stat"><span class="ecp-val">' + pct + '%</span><span class="ecp-lbl">Completado</span></div>'
+      + '<div class="ecp-stat"><span class="ecp-val">' + done + '/' + total + '</span><span class="ecp-lbl">Criterios</span></div>'
+      + '<div class="ecp-stat"><span class="ecp-val">' + globalAvg + '</span><span class="ecp-lbl">Promedio global</span></div>'
+      + '</div>'
+      + '<div class="ecp-bar-wrap"><div class="ecp-bar-fill" style="width:' + pct + '%"></div></div>'
+      + '</div>';
+  }).join('');
+
+  var evalSection = '<div class="page">'
+    + '<div class="section-header"><span class="section-icon">👥</span>Participación del Comité</div>'
+    + '<div class="eval-cards-grid">' + evalCards + '</div>'
+    + '</div>';
+
+  // ── 6. CALIFICACIONES INDIVIDUALES POR EVALUADOR ──────────
+  var indivSection = state.evaluators.map(function(ev, ei) {
+    var projRows = data.map(function(d) {
+      var pi = d.pi;
+      var crRows = CRITERIA.map(function(cr) {
+        var val = state.scores[ei] && state.scores[ei][pi] && state.scores[ei][pi][cr.id];
+        val = val || 0;
+        var dots = [1,2,3,4,5].map(function(v){
+          return '<span class="dot ' + (val >= v ? 'filled' : '') + '"></span>';
+        }).join('');
+        return '<tr>'
+          + '<td class="cr-cat">' + cr.cat + '</td>'
+          + '<td class="cr-name">' + escapeText(cr.name) + '</td>'
+          + '<td class="cr-dots">' + dots + '</td>'
+          + '<td class="tc cr-val ' + (val === 0 ? 'missing' : '') + '">' + (val || '—') + '</td>'
+          + '</tr>';
+      }).join('');
+      var projAvg = computeProjectScore(ei, pi);
+      return '<div class="indiv-proj-block">'
+        + '<div class="ipb-header">'
+        + '<span class="ipb-num">' + (pi + 1) + '</span>'
+        + '<span class="ipb-name">' + escapeText(d.proj.shortName) + '</span>'
+        + '<span class="ipb-title">' + escapeText(d.proj.title) + '</span>'
+        + '<span class="ipb-score">Nota: ' + projAvg + '</span>'
+        + '</div>'
+        + '<table class="cr-table"><thead><tr><th>Categoría</th><th>Criterio</th><th>Calificación</th><th class="tc">Valor</th></tr></thead>'
+        + '<tbody>' + crRows + '</tbody></table>'
+        + '</div>';
+    }).join('');
+
+    return '<div class="page">'
+      + '<div class="section-header"><span class="section-icon">📋</span>Calificaciones de: ' + escapeText(ev.name) + '</div>'
+      + projRows
+      + '</div>';
+  }).join('');
+
+  // ── 7. CSS COMPLETO ───────────────────────────────────────
+  var css = [
+    '@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap");',
+    '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }',
+    'body { font-family: "Montserrat", Arial, sans-serif; background: white; color: #1a1200; font-size: 10px; }',
+
+    /* page breaks */
+    '.page { padding: 32px 36px; page-break-after: always; }',
+    '.page:last-child { page-break-after: avoid; }',
+
+    /* cover */
+    '.cover-page { background: linear-gradient(135deg, #b88000 0%, #FFBB00 55%, #ffd040 100%); min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; }',
+    '.cover-header { display: flex; align-items: center; gap: 12px; padding: 0 0 32px; }',
+    '.cover-brand { font-size: 2rem; font-weight: 900; color: #0f1f3d; letter-spacing: -0.03em; }',
+    '.cover-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.2em; color: #0f1f3d; opacity: 0.6; font-weight: 700; margin-bottom: 16px; }',
+    '.cover-title { font-size: 2.6rem; font-weight: 900; color: #0f1f3d; line-height: 1.1; margin-bottom: 36px; }',
+    '.cover-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; max-width: 500px; }',
+    '.cover-meta-item { background: rgba(255,255,255,0.35); border-radius: 12px; padding: 14px 18px; }',
+    '.cmeta-label { display: block; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: #0f1f3d; opacity: 0.6; font-weight: 700; margin-bottom: 4px; }',
+    '.cmeta-val { display: block; font-size: 1rem; font-weight: 900; color: #0f1f3d; }',
+    '.cover-evals { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }',
+    '.eval-chip { background: rgba(26,51,101,0.15); color: #0f1f3d; font-weight: 700; font-size: 0.78rem; padding: 6px 14px; border-radius: 20px; }',
+    '.cover-footer { font-size: 0.72rem; color: #0f1f3d; opacity: 0.55; font-weight: 600; padding-top: 32px; }',
+
+    /* section header */
+    '.section-header { font-size: 0.78rem; font-weight: 700; color: #1A3365; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 10px; border-bottom: 2px solid #FFBB00; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }',
+    '.section-icon { font-size: 1rem; }',
+
+    /* tables */
+    'table { width: 100%; border-collapse: collapse; font-size: 9px; }',
+    'th { background: #fff8e0; color: #cc9500; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 10px; text-align: left; border-bottom: 1.5px solid #e8d98a; font-weight: 700; white-space: nowrap; }',
+    'td { padding: 8px 10px; border-bottom: 1px solid #f5edc0; vertical-align: middle; }',
+    'tr.even td { background: #fffdf5; }',
+    '.tc { text-align: center; }',
+    '.rank-num { font-weight: 900; font-size: 1rem; color: #1A3365; white-space: nowrap; }',
+    '.proj-sub { font-size: 8.5px; color: #6b5a20; margin-top: 2px; }',
+    '.proj-desc { font-size: 8px; color: #9a8a50; margin-top: 2px; font-style: italic; }',
+
+    /* score bar in ranking */
+    '.score-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }',
+    '.score-bar-wrap { width: 60px; height: 6px; background: #f0e8c0; border-radius: 3px; overflow: hidden; }',
+    '.score-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #e6a800, #1A3365); }',
+    '.score-big { font-size: 1rem; font-weight: 900; color: #1A3365; }',
+
+    /* priority badges */
+    '.priority-badge { padding: 3px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; white-space: nowrap; }',
+    '.priority-high { background: #e0f7e0; color: #1a6020; }',
+    '.priority-mid  { background: #fff8e0; color: #7a5500; }',
+    '.priority-low  { background: #fff0f0; color: #cc2222; }',
+
+    /* category bars */
+    '.cat-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; color: #1A3365; }',
+    '.cat-bar-bg { width: 48px; height: 5px; background: #f0e8c0; border-radius: 3px; overflow: hidden; }',
+    '.cat-bar-fill { height: 5px; border-radius: 3px; background: linear-gradient(90deg, #FFBB00, #1A3365); }',
+
+    /* chart legend */
+    '.chart-legend { display: flex; gap: 20px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }',
+    '.legend-item { font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 12px; }',
+    '.legend-item.low  { background: #fff0f0; color: #cc2222; }',
+    '.legend-item.mid  { background: #fff8e0; color: #7a5500; }',
+    '.legend-item.high { background: #e0f7e0; color: #1a6020; }',
+    '.no-chart { text-align: center; padding: 40px; color: #9a8a50; font-style: italic; background: #fffdf2; border-radius: 8px; }',
+
+    /* evaluator cards */
+    '.eval-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }',
+    '.eval-card-print { background: #fffdf2; border: 1px solid #e8d98a; border-radius: 10px; padding: 16px; }',
+    '.ecp-name { font-weight: 900; color: #1A3365; font-size: 0.88rem; margin-bottom: 10px; }',
+    '.ecp-stats { display: flex; gap: 12px; margin-bottom: 10px; }',
+    '.ecp-stat { flex: 1; text-align: center; }',
+    '.ecp-val { display: block; font-size: 1.3rem; font-weight: 900; color: #cc9500; }',
+    '.ecp-lbl { display: block; font-size: 0.62rem; color: #6b5a20; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }',
+    '.ecp-bar-wrap { height: 6px; background: #f0e8c0; border-radius: 3px; overflow: hidden; }',
+    '.ecp-bar-fill { height: 6px; border-radius: 3px; background: linear-gradient(90deg, #FFBB00, #1A3365); }',
+
+    /* individual criteria */
+    '.indiv-proj-block { margin-bottom: 18px; }',
+    '.ipb-header { display: flex; align-items: center; gap: 10px; background: linear-gradient(90deg, #b88000, #FFBB00); padding: 10px 14px; border-radius: 8px 8px 0 0; }',
+    '.ipb-num { background: #1A3365; color: white; font-weight: 900; font-size: 0.8rem; width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }',
+    '.ipb-name { font-weight: 900; color: #0f1f3d; font-size: 0.9rem; }',
+    '.ipb-title { color: #0f1f3d; opacity: 0.65; font-size: 0.8rem; flex: 1; }',
+    '.ipb-score { font-weight: 900; color: #1A3365; background: rgba(255,255,255,0.5); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; white-space: nowrap; }',
+    '.cr-table { border-radius: 0 0 8px 8px; overflow: hidden; }',
+    '.cr-table th { background: #fff8e0; }',
+    '.cr-cat { font-size: 8px; color: #9a8a50; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }',
+    '.cr-name { font-weight: 600; color: #1a1200; }',
+    '.cr-dots { white-space: nowrap; }',
+    '.dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; border: 1px solid #e8d98a; margin-right: 2px; background: white; vertical-align: middle; }',
+    '.dot.filled { background: #FFBB00; border-color: #e6a800; }',
+    '.cr-val { font-weight: 900; color: #1A3365; font-size: 0.9rem; }',
+    '.cr-val.missing { color: #cc2222; }',
+
+    /* print */
+    '@media print {',
+    '  body { font-size: 9px; }',
+    '  .page { padding: 20px 24px; page-break-after: always; }',
+    '  .cover-page { min-height: auto; page-break-after: always; }',
+    '  .cover-title { font-size: 2rem; }',
+    '  .indiv-proj-block { page-break-inside: avoid; }',
+    '  @page { margin: 0.5cm; size: A4; }',
+    '}'
+  ].join('\n');
+
+  // ── BUILD & OPEN ──────────────────────────────────────────
+  var win = window.open('', '_blank', 'width=1100,height=800');
+  if (!win) { alert('Permite ventanas emergentes para generar el informe PDF.'); return; }
+
+  win.document.write('<!DOCTYPE html><html lang="es"><head>'
+    + '<meta charset="UTF-8">'
+    + '<title>Informe I+D+i · ' + escapeText(state.empresa) + '</title>'
+    + '<style>' + css + '</style>'
     + '</head><body>'
-    + '<h1>Evaluación de Proyectos I+D+i · Plynn</h1>'
-    + '<div class="meta">🏢 ' + escapeText(state.empresa) + ' · 📅 ' + escapeText(fechaStr)
-    + ' · 👥 ' + state.evaluators.map(function(e){return escapeText(e.name);}).join(', ') + '</div>'
-    + '<table><thead><tr><th>#</th><th>Proyecto</th>' + catHeaders + '<th>Nota Final</th><th>Prioridad</th></tr></thead>'
-    + '<tbody>' + rows + '</tbody></table>'
-    + '<div class="footer">Generado por Plynn · Plataforma de Innovación</div>'
-    + '<scr' + 'ipt>window.onload=function(){window.print();}<\/scr' + 'ipt>'
+    + portada
+    + mapaSection
+    + rankingSection
+    + catSection
+    + evalSection
+    + indivSection
+    + '<script>'
+    + 'window.addEventListener("load", function(){'
+    + '  setTimeout(function(){ window.print(); }, 600);'
+    + '});'
+    + '<\/script>'
     + '</body></html>');
   win.document.close();
 }
